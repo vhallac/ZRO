@@ -8,7 +8,14 @@
 
 embeds.xml
 
-locales/locale-enUS.lua
+const.lua
+locales\locale-enUS.lua
 uOO.lua
 ZRO.lua
+# classes
+player.lua
+guild.lua
+roster.lua
+calendar.lua
+# UI
 frames.xml

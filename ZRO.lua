@@ -1,6 +1,8 @@
 local addonName, addonTable = ...
 ZRO = LibStub("AceAddon-3.0"):NewAddon("ZRO", "AceConsole-3.0", "AceEvent-3.0", "AceComm-3.0", "AceTimer-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("ZRO", true)
+-- FIXME: local
+uOO = addonTable.uOO
 
 -- Allow objects access to addon functions
 addonTable.ZRO = ZRO
@@ -15,8 +17,8 @@ local options = {
     args = {
         start = {
             type = 'execute',
-            name = 'Start planning the raid',
-            desc = L["START_DIALOG"],
+            name = L["Start planning the raid"],
+            desc = L["Start planning the raid"],
             func = function() ZRO:Start() end,
         },
     }
@@ -24,8 +26,8 @@ local options = {
 
 function ZRO:OnInitialize()
     -- Localize the UI
-    local uiText = uOO:GetClass("UiText")
-    uiText:LocalizeControls()
+--    local uiText = uOO:GetClass("UiText")
+--    uiText:LocalizeControls()
 end
 
 function ZRO:OnEnable()
@@ -34,13 +36,22 @@ function ZRO:OnEnable()
 
     -- Attempt to obtain calendar information
     local calendarClass = uOO:GetClass("Calendar")
-    calendarClass:RegisterEvent("CalendarLoaded", self.OnCalendarLoaded, self)
     calendarClass:Initialize()
-    self.calendar:LoadEvents()
+    calendarClass:RegisterCallback("CalendarLoaded", self.OnCalendarLoaded, self)
+    calendarClass:LoadEvents()
 end
 
 function ZRO:OnDisable()
     local calendarClass = uOO:GetClass("Calendar")
+    calendarClass:UnregisterCallback("CalendarLoaded")
     calendarClass:Finalize()
-    calendarClass:UnregisterEvent("CalendarLoaded")
+end
+
+
+--- TEMP
+function ZRO:OnUpdateScroll(frame)
+end
+
+function ZRO:OnCalendarLoaded()
+    self:Print("Calendar loaded. No idea how.")
 end

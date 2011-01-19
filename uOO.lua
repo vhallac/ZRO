@@ -1,10 +1,11 @@
 local addonName, addonTable = ...
 
-local uOO = {}
-uOO.classes = {}
+local uOO = {
+    classes = {}
+}
 
 function uOO:NewClass(name, class)
-    addonTable.classes[name] = class
+    self.classes[name] = class
 
     local meta = {
         __index = class,
@@ -26,7 +27,7 @@ function uOO:NewClass(name, class)
 end
 
 function uOO:GetClass(name)
-    return addonTable.classes[name]
+    return self.classes[name]
 end
 
 function uOO:Construct(name, ...)

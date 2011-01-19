@@ -1,6 +1,7 @@
 local addonName, addonTable = ...
 local ZRO = addonTable.ZRO
 local uOO = addonTable.uOO
+local const = addonTable.const
 
 local Guild = uOO:NewClass("Guild",
                            {

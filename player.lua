@@ -1,4 +1,3 @@
-local Guild = LibStub("LibGuild-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("ZRO", true)
 
 local addonName, addonTable = ...
@@ -8,8 +7,8 @@ local const = addonTable.const
 
 local obj = uOO:NewClass("PlayerData",
                          {
-                             player_cache={}
-                             db={},
+                             player_cache={},
+                             db={}
                          })
 
 function obj:Construct()

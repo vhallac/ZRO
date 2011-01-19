@@ -134,31 +134,37 @@
         <Frames>
             <!-- Maybe inherit from OptionsCheckButtonTemplate -->
             <CheckButton name="$parentTank" inherits="UICheckButtonTemplate">
-                <Size x="80" y="17"/>
+                <Size x="17" y="17"/>
                 <Anchors>
                     <Anchor point="TOPLEFT" />
                 </Anchors>
             </CheckButton>
             <CheckButton name="$parentHealer" inherits="UICheckButtonTemplate">
-                <Size x="80" y="17"/>
+                <Size x="17" y="17"/>
                 <Anchors>
-                    <Anchor point="LEFT" relativeTo="$parentTank" relativePoint="RIGHT"/>
+                    <Anchor point="LEFT" relativeTo="$parentTank" relativePoint="RIGHT">
+                        <Offset x="60" y="0"/>
+                    </Anchor>
                 </Anchors>
             </CheckButton>
             <CheckButton name="$parentMelee" inherits="UICheckButtonTemplate">
-                <Size x="80" y="17"/>
+                <Size x="17" y="17"/>
                 <Anchors>
-                    <Anchor point="LEFT" relativeTo="$parentHealer" relativePoint="RIGHT"/>
+                    <Anchor point="LEFT" relativeTo="$parentHealer" relativePoint="RIGHT">
+                        <Offset x="60" y="0"/>
+                    </Anchor>
                 </Anchors>
             </CheckButton>
             <CheckButton name="$parentRanged" inherits="UICheckButtonTemplate">
-                <Size x="80" y="17"/>
+                <Size x="17" y="17"/>
                 <Anchors>
-                    <Anchor point="LEFT" relativeTo="$parentMelee" relativePoint="RIGHT"/>
+                    <Anchor point="LEFT" relativeTo="$parentMelee" relativePoint="RIGHT">
+                        <Offset x="60" y="0"/>
+                    </Anchor>
                 </Anchors>
             </CheckButton>
             <CheckButton name="$parentNotSigned" inherits="UICheckButtonTemplate">
-                <Size x="80" y="17"/>
+                <Size x="17" y="17"/>
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeTo="$parentTank" relativePoint="BOTTOMLEFT">
                         <Offset x="0" y="-8"/>
@@ -166,15 +172,19 @@
                 </Anchors>
             </CheckButton>
             <CheckButton name="$parentOtherRaidNo" inherits="UICheckButtonTemplate">
-                <Size x="80" y="17"/>
+                <Size x="17" y="17"/>
                 <Anchors>
-                    <Anchor point="LEFT" relativeTo="$parentNotSigned" relativePoint="RIGHT"/>
+                    <Anchor point="LEFT" relativeTo="$parentNotSigned" relativePoint="RIGHT">
+                        <Offset x="60" y="0"/>
+                    </Anchor>
                 </Anchors>
             </CheckButton>
             <CheckButton name="$parentHavePenalty" inherits="UICheckButtonTemplate">
-                <Size x="80" y="17"/>
+                <Size x="17" y="17"/>
                 <Anchors>
-                    <Anchor point="LEFT" relativeTo="$parentOtherRaidNo" relativePoint="RIGHT"/>
+                    <Anchor point="LEFT" relativeTo="$parentOtherRaidNo" relativePoint="RIGHT">
+                        <Offset x="60" y="0"/>
+                    </Anchor>
                 </Anchors>
             </CheckButton>
         </Frames>
@@ -191,20 +201,26 @@
             </Layer>
         </Layers>
         <Frames>
+            <Frame name="$parentFilterSettings" inherits="ZROFilterCheckboxGroupTemplate">
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT">
+                        <Offset x="0" y="0"/>
+                    </Anchor>
+                </Anchors>
+            </Frame>
             <ScrollFrame name="$parentScrollList" inherits="FauxScrollFrameTemplate">
-                <Size x="310" y="400"/>
                 <Anchors>
                     <Anchor point="TOPLEFT">
                         <Offset x="0" y="-20"/>
                     </Anchor>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$parentFilterSettings" relativePoint="TOPRIGHT">
-                        <Offset x="0" y="0"/>
+                        <Offset x="0" y="10"/>
                     </Anchor>
                 </Anchors>
                 <Scripts>
                     <OnLoad>
                         <!-- TODO: Not sure if I will use this -->
-                        self.GetParent().scroller = self
+                        self:GetParent().scroller = self
                     </OnLoad>
                     <OnVerticalScroll>
                         ZRO:OnVerticalScroll(self)
@@ -214,13 +230,6 @@
                     </OnShow>
                 </Scripts>
             </ScrollFrame>
-            <Frame name="$parentFilterSettings" inherits="ZROFilterCheckboxGroupTemplate">
-                <Anchors>
-                    <Anchor point="BOTTOMLEFT">
-                        <Offset x="0" y="0"/>
-                    </Anchor>
-                </Anchors>
-            </Frame>
         </Frames>
     </Frame>
 
@@ -285,7 +294,7 @@
                 <Scripts>
                     <OnLoad>
                         <!-- TODO: Not sure if I will use this -->
-                        self.GetParent().scroller = self
+                        self:GetParent().scroller = self
                     </OnLoad>
                     <OnVerticalScroll>
                         ZRO:OnVerticalScroll(self)
@@ -362,7 +371,7 @@
         <Layers>
             <Layer>
                 <Texture name="$parentHeaderTexture" file="Interface\DialogFrame\UI-DialogBox-Header">
-                    <Size x="256" y="64" />
+                    <Size x="330" y="64" />
                     <Anchors>
                         <Anchor point="TOP">
                             <Offset x="0" y="12" />
@@ -392,7 +401,10 @@
             <Frame name="$parentPlayerList" inherits="ZROPlayerListTemplate">
                 <Anchors>
                     <Anchor point="TOPLEFT">
-                        <Offset x="0" y="0"/>
+                        <Offset x="20" y="-30"/>
+                    </Anchor>
+                    <Anchor point="BOTTOM">
+                        <Offset x="20" y="30"/>
                     </Anchor>
                 </Anchors>
             </Frame>
@@ -405,5 +417,19 @@
             </Frame>
             <!-- And insert the raid buffs and stuff down here... -->
         </Frames>
+        <Scripts>
+            <OnLoad>
+                table.insert(UISpecialFrames, self:GetName())
+            </OnLoad>
+            <OnMouseDown>
+                self:StartMoving();
+            </OnMouseDown>
+            <OnMouseUp>
+                self:StopMovingOrSizing();
+            </OnMouseUp>
+            <OnDragStop>
+                self:StopMovingOrSizing();
+            </OnDragStop>
+        </Scripts>
     </Frame>
 </Ui>

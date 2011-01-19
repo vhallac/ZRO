@@ -1,11 +1,25 @@
 local addonName, addonTable = ...
-local ZRO = addonTable.ZRO
-local uOO = addonTable.uOO
+
+local ZRO   = addonTable.ZRO
+local uOO   = addonTable.uOO
+local const = addonTable.const
 
 local Calendar = uOO:NewClass("Calendar",
                             {
                                 events = {}
                             })
+
+
+function Calendar:Initialize()
+    if not self.callbacks then
+        self.callbacks = LibStub("CallbackHandler-1.0"):New(self)
+    end
+end
+
+function Calendar:Finalize()
+    -- Unregister all events?
+end
+
 -- The code below is going to be tricky. As usual, events are involved in
 -- collecting the information we are after. To simplify the code, I will use
 -- coroutines to create the illusion of continuity.
@@ -15,10 +29,7 @@ do
     local queryCalendar, onOpenEvent
 
     -- Warning: only call after PLAYER_LOGIN event is fired
-    function Calendar:Initialize()
-        if not self.callbacks then
-            self.callbacks = LibStub("CallbackHandler-1.0"):New(self)
-        end
+    function Calendar:LoadEvents()
         coCalendarQuery = coroutine.create(queryCalendar)
         if coCalendarQuery then
             local status, err = coroutine.resume(coCalendarQuery, self)
@@ -26,9 +37,8 @@ do
                 ZRO:Print("Cannot query calendar - " .. (err or "no info"))
             end
         else
-            ZRO_Print("ZebRaid: Cannot query calendar")
+            ZRO_Print("Cannot query calendar")
         end
-        -- TODO: Check if this thing is waiting until coroutine ends. I doubt it.
     end
 
     queryCalendar = function(self)
@@ -87,6 +97,7 @@ do
         end
         coroutine.resume(coCalendarQuery, inviteTbl)
     end
+end
 
 function Calendar:Construct()
 end
