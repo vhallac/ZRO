@@ -1,0 +1,14 @@
+## Interface: 40000
+## Title: Zebra Raid Organizer (ZRO)
+## Author: Dys
+## DefaultState: Enabled
+## SavedVariables:
+## LoadOnDemand: 0
+## OptionalDeps:
+
+embeds.xml
+
+locales/locale-enUS.lua
+uOO.lua
+ZRO.lua
+frames.xml

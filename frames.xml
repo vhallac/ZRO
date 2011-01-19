@@ -1,0 +1,409 @@
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Font name="PlayerFontTplt" inherits="GameFontNormal" justifyH="CENTER" virtual="true">
+        <FontHeight>
+            <AbsValue val="17"/>
+        </FontHeight>
+        <Color r="1" g="0.8196079" b="0" />
+    </Font>
+    <Font name="TitleFontTplt" inherits="GameFontNormal" justifyH="CENTER" virtual="true">
+        <FontHeight>
+            <AbsValue val="21"/>
+        </FontHeight>
+        <Color r="0.8" g="0.8" b="0.8" />
+    </Font>
+    <Font name="StatsFontTplt" inherits="GameFontNormal" justifyH="LEFT" virtual="true">
+        <FontHeight>
+            <AbsValue val="15"/>
+        </FontHeight>
+        <Color r="1" g="1" b="1" />
+    </Font>
+    <!-- Simple button that looks like a label -->
+	<Button name="RoleButtonTemplate" virtual="true">
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="$parentColor">
+                    <Color r="0.8" g="0.8" b="0.8"/>
+                </Texture>
+            </Layer>
+        </Layers>
+		<ButtonText name="$parentText"/>
+		<NormalFont style="GameFontNormal" />
+		<HighlightFont style="GameFontHighlight"/>
+		<DisabledFont style="GameFontDisable"/>
+    </Button>
+    <Button name="ZROPlayerTemplate" virtual="true" hidden="true" parent="ZebRaidDialogPanel" movable="true">
+        <Size x="280" y="17" />
+        <Anchors>
+            <Anchor point="TOP" />
+        </Anchors>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="$parentColor">
+                    <Color r="0.6941177" g="0.6" b="0.4901961" a="0.6941177" />
+                </Texture>
+            </Layer>
+            <Layer>
+                <FontString name="$parentStatus" inherits="PlayerFontTplt">
+                    <Size x="20" y="17" />
+                    <Anchors>
+                        <Anchor point="LEFT" />
+                    </Anchors>
+                </FontString>
+                <FontString name="$parentRaidId" inherits="PlayerFontTplt">
+                    <Size x="20" y="17" />
+                    <Anchors>
+                        <Anchor point="LEFT">
+                            <Offset x="60" y="0" />
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+                <FontString name="$parentName" inherits="PlayerFontTplt" justifyH="LEFT">
+                    <Size x="120" y="17" />
+                    <Anchors>
+                        <Anchor point="LEFT">
+                            <Offset x="80" y="0" />
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+                <FontString name="$parentRole" inherits="PlayerFontTplt" justifyH="RIGHT">
+                    <Size x="60" y="17" />
+                    <Anchors>
+                        <Anchor point="LEFT">
+                            <Offset x="200" y="0" />
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <Button name="$parentInvite" inherits="UIPanelButtonTemplate" text="->">
+                <Size x="20" y="17"/>
+                <Anchors>
+                    <Anchor point="LEFT">
+                        <Offset x="20" y="0"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        ZRO:OnInviteClick(self)
+                    </OnClick>
+                </Scripts>
+            </Button>
+            <Button name="$parentPrimaryRole" inherits="RoleButtonTemplate" text="P">
+                <Size x="20" y="17"/>
+                <Anchors>
+                    <Anchor point="RIGHT">
+                        <Offset x="-20" y="0"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        ZRO:OnPrimaryRoleClick(self)
+                    </OnClick>
+                </Scripts>
+            </Button>
+            <Button name="$parentSecondaryRole" inherits="RoleButtonTemplate" text="S">
+                <Size x="20" y="17"/>
+                <Anchors>
+                    <Anchor point="RIGHT">
+                        <Offset x="0" y="0"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        ZRO:OnSecondryRoleClick(self)
+                    </OnClick>
+                </Scripts>
+            </Button>
+        </Frames>
+        <Scripts>
+            <OnEnter>
+                ZRO:ShowTooltip(self)
+            </OnEnter>
+            <OnLeave>
+                ZRO:HideTooltip(self)
+            </OnLeave>
+        </Scripts>
+    </Button>
+
+    <!-- The text for the checkbuttons will be filled in from the UI
+         localization code. -->
+    <Frame name="ZROFilterCheckboxGroupTemplate" virtual="true">
+        <Size x="320" y="25"/>
+        <Frames>
+            <!-- Maybe inherit from OptionsCheckButtonTemplate -->
+            <CheckButton name="$parentTank" inherits="UICheckButtonTemplate">
+                <Size x="80" y="17"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT" />
+                </Anchors>
+            </CheckButton>
+            <CheckButton name="$parentHealer" inherits="UICheckButtonTemplate">
+                <Size x="80" y="17"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentTank" relativePoint="RIGHT"/>
+                </Anchors>
+            </CheckButton>
+            <CheckButton name="$parentMelee" inherits="UICheckButtonTemplate">
+                <Size x="80" y="17"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentHealer" relativePoint="RIGHT"/>
+                </Anchors>
+            </CheckButton>
+            <CheckButton name="$parentRanged" inherits="UICheckButtonTemplate">
+                <Size x="80" y="17"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentMelee" relativePoint="RIGHT"/>
+                </Anchors>
+            </CheckButton>
+            <CheckButton name="$parentNotSigned" inherits="UICheckButtonTemplate">
+                <Size x="80" y="17"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parentTank" relativePoint="BOTTOMLEFT">
+                        <Offset x="0" y="-8"/>
+                    </Anchor>
+                </Anchors>
+            </CheckButton>
+            <CheckButton name="$parentOtherRaidNo" inherits="UICheckButtonTemplate">
+                <Size x="80" y="17"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentNotSigned" relativePoint="RIGHT"/>
+                </Anchors>
+            </CheckButton>
+            <CheckButton name="$parentHavePenalty" inherits="UICheckButtonTemplate">
+                <Size x="80" y="17"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentOtherRaidNo" relativePoint="RIGHT"/>
+                </Anchors>
+            </CheckButton>
+        </Frames>
+    </Frame>
+
+    <Frame name="ZROPlayerListTemplate" virtual="true">
+        <Layers>
+            <Layer>
+                <FontString name="$parentTitle" inherits="TitleFontTplt" text="Player List">
+                    <Anchors>
+                        <Anchor point="TOPLEFT"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <ScrollFrame name="$parentScrollList" inherits="FauxScrollFrameTemplate">
+                <Size x="310" y="400"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT">
+                        <Offset x="0" y="-20"/>
+                    </Anchor>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$parentFilterSettings" relativePoint="TOPRIGHT">
+                        <Offset x="0" y="0"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        <!-- TODO: Not sure if I will use this -->
+                        self.GetParent().scroller = self
+                    </OnLoad>
+                    <OnVerticalScroll>
+                        ZRO:OnVerticalScroll(self)
+                    </OnVerticalScroll>
+                    <OnShow>
+                        ZRO:OnUpdateScroll(self)
+                    </OnShow>
+                </Scripts>
+            </ScrollFrame>
+            <Frame name="$parentFilterSettings" inherits="ZROFilterCheckboxGroupTemplate">
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT">
+                        <Offset x="0" y="0"/>
+                    </Anchor>
+                </Anchors>
+            </Frame>
+        </Frames>
+    </Frame>
+
+    <Frame name="ZRORaidCountTplt" virtual="true">
+        <Layers>
+            <Layer>
+                <FontString name="$parentLabel" inherits="StatsFontTplt">
+                    <Anchors>
+                        <Anchor point="LEFT"/>
+                    </Anchors>
+                </FontString>
+                <FontString name="$parentVal" inherits="StatsFontTplt">
+                    <Anchors>
+                        <Anchor point="RIGHT"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+    </Frame>
+    <Frame name="ZRORaidAreaTemplate" virtual="true">
+        <Layers>
+            <Layer>
+                <FontString name="$parentTitle" inherits="TitleFontTplt" text="Raid Setup">
+                    <Anchors>
+                        <Anchor point="TOPLEFT"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <Button name="$parentNewRaid" inherits="UIPanelButtonTemplate" text="+">
+                <Size x="20" y="20"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT">
+                        <Offset x="0" y="-25"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        ZRF:OnNewRaidClick(self)
+                    </OnClick>
+                </Scripts>
+            </Button>
+            <Frame name="$parentRaidSelect" inherits="UIDropDownMenuTemplate">
+                <Size x="290" y="20"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentNewRaid" relativePoint="RIGHT">
+                        <Offset x="5" y="0"/>
+                    </Anchor>
+                </Anchors>
+            </Frame>
+            <ScrollFrame name="$parentScrollList" inherits="FauxScrollFrameTemplate">
+                <Size x="310" y="400"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parentFilterSettings" relativePoint="BOTTOMLEFT">
+                        <Offset x="0" y="-5"/>
+                    </Anchor>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$parentLeaveRaid" relativePoint="TOPRIGHT">
+                        <Offset x="0" y="10"/>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        <!-- TODO: Not sure if I will use this -->
+                        self.GetParent().scroller = self
+                    </OnLoad>
+                    <OnVerticalScroll>
+                        ZRO:OnVerticalScroll(self)
+                    </OnVerticalScroll>
+                    <OnShow>
+                        ZRO:OnUpdateScroll(self)
+                    </OnShow>
+                </Scripts>
+            </ScrollFrame>
+            <Button name="$parentLeaveRaid" inherits="UIPanelButtonTemplate" text="Leave Raid">
+                <Size x="100" y="20"/>
+                <Anchors>
+                    <Anchor point="BOTTOMRIGHT">
+                        <Offset x="0" y="20"/>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <Button name="$parentInvite" inherits="UIPanelButtonTemplate" text="Invite">
+                <Size x="100" y="20"/>
+                <Anchors>
+                    <Anchor point="RIGHT" relativeTo="$parentLeaveRaid" relativePoint="LEFT">
+                        <Offset x="-10" y="0"/>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <Frame name="$parentTankStats" inherits="ZRORaidCountTplt">
+                <Size x="80" y="20"/>
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT"/>
+                </Anchors>
+            </Frame>
+            <Frame name="$parentHealerStats" inherits="ZRORaidCountTplt">
+                <Size x="80" y="20"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentTankStats" relativePoint="RIGHT">
+                        <Offset x="5"/>
+                    </Anchor>
+                </Anchors>
+            </Frame>
+            <Frame name="$parentMeleeStats" inherits="ZRORaidCountTplt">
+                <Size x="80" y="20"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentHealerStats" relativePoint="RIGHT">
+                        <Offset x="5"/>
+                    </Anchor>
+                </Anchors>
+            </Frame>
+            <Frame name="$parentRangedStats" inherits="ZRORaidCountTplt">
+                <Size x="80" y="20"/>
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentMeleeStats" relativePoint="RIGHT">
+                        <Offset x="5"/>
+                    </Anchor>
+                </Anchors>
+            </Frame>
+        </Frames>
+    </Frame>
+
+    <Frame name="ZRODialog" hidden="true" parent="UIParent" movable="true"
+           frameStrata="DIALOG" enableMouse="true" clampedToScreen="true">
+        <Size x="700" y="600"/>
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+            <BackgroundInsets left="11" right="12" top="12" bottom="11" />
+            <TileSize>
+                <AbsValue val="32" />
+            </TileSize>
+            <EdgeSize>
+                <AbsValue val="32" />
+            </EdgeSize>
+        </Backdrop>
+        <Layers>
+            <Layer>
+                <Texture name="$parentHeaderTexture" file="Interface\DialogFrame\UI-DialogBox-Header">
+                    <Size x="256" y="64" />
+                    <Anchors>
+                        <Anchor point="TOP">
+                            <Offset x="0" y="12" />
+                        </Anchor>
+                    </Anchors>
+                </Texture>
+                <FontString name="$parentHeaderText" inherits="TitleFontTplt" text="Zebra Raid Organizer">
+                    <Anchors>
+                        <Anchor point="TOP" relativeTo="$parentHeaderTexture">
+                            <Offset x="0" y="-14" />
+                        </Anchor>
+                    </Anchors>
+                    <Color r="1" g="0.8" b="0" />
+                    <Shadow>
+                        <Color r="0" g="0" b="0" />
+                        <Offset x="1" y="-1" />
+                    </Shadow>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <Button name="$parentClose" inherits="UIPanelCloseButton">
+                <Anchors>
+                    <Anchor point="TOPRIGHT"/>
+                </Anchors>
+            </Button>
+            <Frame name="$parentPlayerList" inherits="ZROPlayerListTemplate">
+                <Anchors>
+                    <Anchor point="TOPLEFT">
+                        <Offset x="0" y="0"/>
+                    </Anchor>
+                </Anchors>
+            </Frame>
+            <Frame name="$parentRaidSetup" inherits="ZRORaidAreaTemplate">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parentPlayerList" relativePoint="TOPRIGHT">
+                        <Offset x="10" y="0"/>
+                    </Anchor>
+                </Anchors>
+            </Frame>
+            <!-- And insert the raid buffs and stuff down here... -->
+        </Frames>
+    </Frame>
+</Ui>
