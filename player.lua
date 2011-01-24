@@ -13,15 +13,43 @@ local player_cache=setmetatable({}, {__mode="kv"})
 local db = {}
 local roster
 local guild
+local state
+local callbacks = LibStub("CallbackHandler-1.0"):New(PlayerData)
 
-function PlayerData:Construct()
+-- A set of classes that generate player lists. They register to PlayerData
+-- using the PlayerData:RegisterPlayerSource() function
+local sources = {}
+
+function PlayerData:Initialize()
     if not roster then
         roster = uOO.Roster
+    end
+    if not state then
+        state = true
+--        state = uOO.State
     end
 
     if not guild then
         guild = uOO.Guild
+        guild:RegisterCallback("JoinedGuild", self.OnGuildChanged, self)
+        guild:RegisterCallback("LeftGuild", self.OnGuildChanged, self)
+        guild:RegisterCallback("MemberConnected", self.OnPlayerChanged, self)
+        guild:RegisterCallback("MemberDisconnected", self.OnPlayerChanged, self)
+        guild:RegisterCallback("MemberRemoved", self.OnPlayerChanged, self)
+        guild:RegisterCallback("MemberAdded", self.OnPlayerChanged, self)
     end
+end
+
+function PlayerData:OnGuildChanged()
+    callbacks:Fire("ListUpdate")
+end
+
+function PlayerData:OnPlayerChanged(event, name)
+    callbacks:Fire("PlayerUpdate", self:Get(name))
+end
+
+function PlayerData:RegisterPlayerSource(name, iterFunc, getNameFunc)
+    sources[name] = {iter = iterFunc, GetName = getNameFunc}
 end
 
 -- Set the backing store for the class. If this is not called very early, some
@@ -29,6 +57,7 @@ end
 -- not persist.
 function PlayerData:SetDataStore(new_db)
     db = new_db
+    callbacks:Fire("ListUpdate")
 end
 
 function PlayerData:Get(name)
@@ -57,28 +86,22 @@ end
 -- filterfunc is called with name
 -- sortfunc is called with the names of the players tro be compared
 function PlayerData:GetIterator(filterfunc, sortfunc)
-    local tmp = {}
     local res = {}
+
     -- Pick up players from online people, registered users, and players assigned
     -- to roles.
 
-    for name in guild:GetIterator("NAME", false) do
-        tmp[name] = true
-    end
-
-    for name in self.state:RegistrationIterator() do
-        tmp[name] = true
-    end
-
-    for name in self.state:AssignmentsIterator() do
-        tmp[name] = true
-    end
-
-    for name in pairs(tmp) do
-        tmp[name] = nil
-        local player = self:Get(name)
-        if not filterfunc or filterfunc(player) then
-            table.insert(res, player)
+    for _, source in pairs(sources) do
+        for _, item in source.iter() do
+            ZRO:Print(source.GetName(item))
+            local name = source.GetName(item)
+            local player = self:Get(name)
+            if ( player and
+                 not filterfunc or
+                 filterfunc(player) )
+            then
+                table.insert(res, player)
+            end
         end
     end
 
@@ -98,10 +121,6 @@ function PlayerData:GetIterator(filterfunc, sortfunc)
     return iterfunc, res, nil
 end
 
--- Class that represents a player. It has a PlayerData backend for persistent
--- state management.
-Player = uOO:NewClass("Player", {})
-
 function Player:Initialize(playerdata, name, record)
     self.playerData = playerdata
     self.name = name
@@ -114,32 +133,33 @@ end
 
 -- These two helper functions make sure changes are replicated for both entries
 
-local function set_role(record_name, role)
+local function set_role(self, record_name, role)
     local role = string.lower(role or "unknown")
     -- Update the player role with the new one unless the role is
     -- unknown. If the player role is not recorded yet, just stick
     -- anything we have (including unknown) to it.
     self.record[record_name] = role
+    self.playerdata:OnPlayerChanged(self:GetName())
 end
 
-local function get_role(record_name)
+local function get_role(self, record_name)
     return string.lower(self.record[record_name] or "unknown")
 end
 
 function Player:SetPrimaryRole(role)
-    set_role("primary_role", role)
+    set_role(self, "primary_role", role)
 end
 
 function Player:GetPrimaryRole()
-    return get_role("primary_role")
+    return get_role(self, "primary_role")
 end
 
 function Player:SetSecondaryRole(role)
-    set_role("secondary_role", role)
+    set_role(self, "secondary_role", role)
 end
 
 function Player:GetSecondaryRole()
-    return get_role("secondary_role")
+    return get_role(self, "secondary_role")
 end
 
 -- Select the active role:
@@ -147,6 +167,7 @@ end
 --   2 - offspec
 function Player:SetSelectedRole(selected)
     self.record.selected_role = selected
+    self.playerdata:OnPlayerChanged(self:GetName())
 end
 
 function Player:GetSelectedRole()
@@ -186,6 +207,7 @@ do
         if cur_date ~= last_date then
             table.insert(get_dates(player, table_name), curDate)
         end
+        self.playerdata:OnPlayerChanged(self:GetName())
     end
 
     local function remove_date(player, table_name)
@@ -194,6 +216,7 @@ do
         if  cur_date == last_date then
             table.remove(get_dates(player, table_name))
         end
+        self.playerdata:OnPlayerChanged(self:GetName())
     end
 
     -- Types of date sets we'll keep
@@ -292,11 +315,13 @@ function Player:GetAssignment()
 end
 
 function Player:SetAssignment(assignment)
-    return self.playerData.state:SetAssignment(self.name, assignment)
+    self.playerData.state:SetAssignment(self.name, assignment)
+    self.playerdata:OnPlayerChanged(self:GetName())
 end
 
 function Player:RemoveAssignment()
-    return self.playerData.state:RemoveAssignment(self.name)
+    self.playerData.state:RemoveAssignment(self.name)
+    self.playerdata:OnPlayerChanged(self:GetName())
 end
 
 function Player:GetClassColor()

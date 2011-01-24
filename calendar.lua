@@ -74,7 +74,7 @@ do
         [9] = const.UNSURE,
     }
     onOpenEvent = function(self)
-        local numInvites = CalendarGetNumInvites()
+        local numInvites = CalendarEventGetNumInvites()
         local inviteTbl = {}
         for i=1, numInvites do
             local name, level, className, classFileName, inviteStatus, modStatus, inviteIsMine, inviteType = CalendarEventGetInvite(index)

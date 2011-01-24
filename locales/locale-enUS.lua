@@ -6,3 +6,14 @@ local const = addonTable.const
 
 L[const.UNKNOWN] = "*UNKNOWN*"
 L["Start planning the raid"] = true
+L["Player List"] = true
+L["Tank"] = true
+L["Healer"] = true
+L["Melee"] = true
+L["Ranged"] = true
+L["Not Signed"] = true
+L["Other Raid"] = true
+L["Have Penalty"] = true
+L["Raid Setup"] = true
+L["Leave Raid"] = true
+L["Invite"] = true

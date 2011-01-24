@@ -16,18 +16,13 @@ function Roster:Initialize()
 
         -- Assume there was a change, and record the current status
         self:MembersChanged()
-
-        initialized = true
     end
 end
 
 -- This is a class method
 function Roster:Finalize()
-    if initialized then
-        initialized = false
-        ZRO:UnregisterEvent("PARTY_MEMBERS_CHANGED")
-        ZRO:UnregisterEvent("RAID_ROSTER_UPDATE")
-    end
+    ZRO:UnregisterEvent("PARTY_MEMBERS_CHANGED")
+    ZRO:UnregisterEvent("RAID_ROSTER_UPDATE")
 end
 
 function Roster:IsPlayerInRaid(player)
@@ -40,8 +35,6 @@ end
 
 -- This is a class method (see how it is registered)
 function Roster:MembersChanged()
-    ZRO:Debug("Roster:MembersChanged()")
-
     local updated = false
 
     -- Get rid of people who left the raid, or changed unit ids
@@ -80,8 +73,6 @@ function Roster:MembersChanged()
     if updated then
         callbacks:Fire("RosterUpdated")
     end
-
-    ZRO:Debug("Roster:MembersChanged():END")
 end
 
 -- Don't allow cloning this.

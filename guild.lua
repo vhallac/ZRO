@@ -6,7 +6,7 @@ local const = addonTable.const
 local Guild = uOO.object:clone()
 local initialized = false
 local memberList = {}
-local callbacks = callbacks = LibStub("CallbackHandler-1.0"):New(Guild)
+local callbacks = LibStub("CallbackHandler-1.0"):New(Guild)
 
 function Guild:Initialize()
     if not initialized then
@@ -17,6 +17,20 @@ function Guild:Initialize()
         GuildRoster()
 
         initialized = true
+
+        local playerData = uOO.PlayerData
+        playerData:RegisterPlayerSource("guild",
+                                        function(filterfunc, sortfunc)
+                                            return self:GetIterator(filterfunc, sortfunc)
+                                        end,
+                                        function(iter)
+                                            return self:GetName(iter)
+                                        end)
+        ZRO:RegisterEvent("GUILD_ROSTER_UPDATE", self.GuildUpdate, self)
+        ZRO:RegisterEvent("PLAYER_GUILD_UPDATE", self.PlayerUpdate, self)
+
+        -- Schedule the first guild roster callback
+        GuildRoster()
     end
 end
 
@@ -103,7 +117,7 @@ function Guild:SyncMembers()
     -- Now, all my data is up to date. I can start sending events
     local deleteList = nil
 
-    for name, player in pairs(self.memberList) do
+    for name, player in pairs(memberList) do
         if player.oldOnline ~= player.online then
             callbacks:Fire(player.online and
                            "MemberConnected" or
@@ -127,7 +141,7 @@ function Guild:SyncMembers()
 end
 
 function Guild:ClearAll(shouldClearSelf)
-    for name, _ in pairs(self.memberList) do
+    for name, _ in pairs(memberList) do
         memberList[name] = nil
         callbacks:Fire("PlayerRemoved", name)
     end
@@ -149,7 +163,7 @@ function Guild:GetIterator(filterfunc, sortfunc)
     -- Pick up players from online people, registered users, and players assigned
     -- to roles.
 
-    for name, player in pairs(self.memberList) do
+    for name, player in pairs(memberList) do
         tmp[name] = nil
         if not filterfunc or filterfunc(player) then
             table.insert(res, player)
@@ -201,7 +215,7 @@ do
 
     for _, data in ipairs(accessors) do
         Guild[data[1]] = function(self, nameOrInfo)
-            get_data(nameOrInfo, data[2], data[3])
+            return get_data(nameOrInfo, data[2], data[3])
         end
     end
 
