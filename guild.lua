@@ -5,37 +5,38 @@ local const = addonTable.const
 
 local Guild = uOO:NewClass("Guild",
                            {
-                               initialized = false,
                                memberList = {},
                            })
 
 -- This is a class method
 function Guild:Initialize()
-    if not self.initialized then
-        if not self.callbacks then
-            self.callbacks = LibStub("CallbackHandler-1.0"):New(self)
-        end
-        ZRO:RegisterEvent("GUILD_ROSTER_UPDATE", self.GuildUpdate, self)
-        ZRO:RegisterEvent("PLAYER_GUILD_UPDATE", self.PlayerUpdate, self)
-
-        -- Schedule the first guild roster callback
-        GuildRoster()
-
-        initialized = true
+    if not self.callbacks then
+        self.callbacks = LibStub("CallbackHandler-1.0"):New(self)
     end
+    ZRO:RegisterEvent("GUILD_ROSTER_UPDATE", self.GuildUpdate, self)
+    ZRO:RegisterEvent("PLAYER_GUILD_UPDATE", self.PlayerUpdate, self)
+
+    -- Schedule the first guild roster callback
+    GuildRoster()
 end
 
 -- This is a class method
 function Guild:Finalize()
-    if initialized then
-        initialized = false
-        ZRO:UnregisterEvent("PLAYER_GUILD_UPDATE")
-        ZRO:UnregisterEvent("GUILD_ROSTER_UPDATE")
-        self.callbacks:UnregisterAllCallbacks()
-    end
+    ZRO:UnregisterEvent("PLAYER_GUILD_UPDATE")
+    ZRO:UnregisterEvent("GUILD_ROSTER_UPDATE")
 end
 
 function Guild:Construct()
+    local playerData = uOO:GetClass("PlayerData")
+    if playerData then
+        playerData:RegisterPlayerSource("guild",
+                                        function(filterfunc, sortfunc)
+                                            return self:GetIterator(filterfunc, sortfunc)
+                                        end,
+                                        function(iter)
+                                            return self:GetName(iter)
+                                        end)
+    end
 end
 
 function Guild:GuildUpdate(event, arg1)
@@ -80,12 +81,12 @@ function Guild:SyncMembers()
 
         local player
         if name then
-            if not self.players[name] then
+            if not self.memberList[name] then
                 player = {}
-                self.players[name] = player
+                self.memberList[name] = player
                 player.new = true -- Processed and cleared later
             else
-                player = self.players[name]
+                player = self.memberList[name]
             end
 
             player.name = name -- I know it is redundant, but speeds things up
@@ -209,7 +210,7 @@ do
 
     for _, data in ipairs(accessors) do
         Guild[data[1]] = function(self, nameOrInfo)
-            get_data(self, nameOrInfo, data[2], data[3])
+            return get_data(self, nameOrInfo, data[2], data[3])
         end
     end
 

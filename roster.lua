@@ -4,31 +4,26 @@ local uOO = addonTable.uOO
 
 local Roster = uOO:NewClass("Roster",
                             {
-                                initialized = false
                             })
 
 -- This is a class method
 function Roster:Initialize()
-    if not self.initialized then
-        if not self.unitIds then self.unitIds = {} end
-
-        ZRO:RegisterEvent("RAID_ROSTER_UPDATE", self.MembersChanged, self)
-        ZRO:RegisterEvent("PARTY_MEMBERS_CHANGED", self.MembersChanged, self)
-
-        -- Assume there was a change, and record the current status
-        self:MembersChanged()
-
-        initialized = true
+    if not self.callbacks then
+        self.callbacks = LibStub("CallbackHandler-1.0"):New(self)
     end
+    if not self.unitIds then self.unitIds = {} end
+
+    ZRO:RegisterEvent("RAID_ROSTER_UPDATE", self.MembersChanged, self)
+    ZRO:RegisterEvent("PARTY_MEMBERS_CHANGED", self.MembersChanged, self)
+
+    -- Assume there was a change, and record the current status
+    self:MembersChanged()
 end
 
 -- This is a class method
 function Roster:Finalize()
-    if initialized then
-        initialized = false
-        ZRO:UnregisterEvent("PARTY_MEMBERS_CHANGED")
-        ZRO:UnregisterEvent("RAID_ROSTER_UPDATE")
-    end
+    ZRO:UnregisterEvent("PARTY_MEMBERS_CHANGED")
+    ZRO:UnregisterEvent("RAID_ROSTER_UPDATE")
 end
 
 function Roster:Construct()
@@ -84,11 +79,10 @@ function Roster:MembersChanged()
     end
 
     if updated then
-        ZRO:Debug("Triggering ZebRaid_RosterUpdated");
         -- TODO: So many things wrong with this design. Create a per-instance
         -- callback handler, and some sort of event handler that isolates the
         -- ZebRaid logic from the details.
-        ZRO:SendMessage("ZebRaid_RosterUpdated")
+        self.callbacks:Fire("ZebRaid_RosterUpdated")
     end
 
     ZRO:Debug("Roster:MembersChanged():END")

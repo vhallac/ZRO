@@ -17,5 +17,10 @@ player.lua
 guild.lua
 roster.lua
 calendar.lua
+filters.lua
+playerlist_m.lua
 # UI
+filters_ui.lua
+scrollframe.lua
 frames.xml
+ui_text.lua

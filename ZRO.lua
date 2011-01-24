@@ -9,7 +9,10 @@ addonTable.ZRO = ZRO
 
 -- Saved Variables
 ZRO_PlayerData = {}
-
+ZRO_Settings = {
+    filters = {
+    }
+}
 local options = {
     name = "ZRO",
     handler = ZRO,
@@ -26,25 +29,30 @@ local options = {
 
 function ZRO:OnInitialize()
     -- Localize the UI
---    local uiText = uOO:GetClass("UiText")
---    uiText:LocalizeControls()
+    local uiText = uOO:GetClass("UiText")
+    uiText:LocalizeControls()
 end
 
 function ZRO:OnEnable()
     -- Set up the data stores of classes that need persistence
     uOO:GetClass("PlayerData"):SetDataStore(ZRO_PlayerData)
+    uOO:GetClass("FilterSettings"):SetDataStore(ZRO_Settings.filters)
+
+    uOO:GetClass("Guild"):Initialize()
 
     -- Attempt to obtain calendar information
-    local calendarClass = uOO:GetClass("Calendar")
-    calendarClass:Initialize()
-    calendarClass:RegisterCallback("CalendarLoaded", self.OnCalendarLoaded, self)
-    calendarClass:LoadEvents()
+    local calendar = uOO:Construct("Calendar")
+    calendar:RegisterCallback("CalendarLoaded", self.OnCalendarLoaded, self)
+    calendar:LoadEvents()
+
+    self.playerList = uOO:Construct("PlayerListModel")
 end
 
 function ZRO:OnDisable()
     local calendarClass = uOO:GetClass("Calendar")
     calendarClass:UnregisterCallback("CalendarLoaded")
-    calendarClass:Finalize()
+
+    uOO:GetClass("Guild"):Finalize()
 end
 
 

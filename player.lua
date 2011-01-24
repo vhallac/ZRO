@@ -7,15 +7,29 @@ local const = addonTable.const
 
 local obj = uOO:NewClass("PlayerData",
                          {
-                             player_cache={},
-                             db={}
+                             player_cache = {},
+                             sources      = {},
+                             db           = {}
                          })
 
 function obj:Construct()
+    if not self.class.callbacks then
+        self.class.callbacks = LibStub("CallbackHandler-1.0"):New(self.class)
+    end
+
     if not self.class.state then
-        -- stop the infinite loop
         self.class.state = true
-        self.class.state = uOO:Construct("State")
+--        self.class.state = uOO:Construct("State")
+    end
+
+    if not self.class.guild then
+        self.class.guild = uOO:Construct("Guild")
+        self.class.guild:RegisterCallback("JoinedGuild", self.class.OnGuildChanged, self.class)
+        self.class.guild:RegisterCallback("LeftGuild", self.class.OnGuildChanged, self.class)
+        self.class.guild:RegisterCallback("MemberConnected", self.class.OnPlayerChanged, self.class)
+        self.class.guild:RegisterCallback("MemberDisconnected", self.class.OnPlayerChanged, self.class)
+        self.class.guild:RegisterCallback("MemberRemoved", self.class.OnPlayerChanged, self.class)
+        self.class.guild:RegisterCallback("MemberAdded", self.class.OnPlayerChanged, self.class)
     end
 
     if not self.class.roster then
@@ -23,23 +37,46 @@ function obj:Construct()
     end
 end
 
+function obj:OnGuildChanged()
+    self.callbacks:Fire("ListUpdate")
+end
+
+function obj:OnPlayerChanged(event, name)
+    self.callbacks:Fire("PlayerUpdate", self:Get(name))
+end
+
+function obj:RegisterPlayerSource(name, iterFunc, getNameFunc)
+    local class = obj.class or obj
+    if not class.sources then
+        class.sources = {}
+    end
+
+    class.sources[name] = {iter = iterFunc, GetName = getNameFunc}
+end
+
 -- Set the backing store for the class. If this is not called very early, some
 -- of the data we store will get lost. If it is not called at all, the data will
 -- not persist.
 function obj:SetDataStore(db)
-    self.db = data
+    if db then
+        self.db = db
+    end
+
+    if self.callbacks then
+        self.callbacks:Fire("ListUpdate")
+    end
 end
 
 function obj:Get(name)
-    if not self.data[name] then
-        self.data[name] = {}
+    if not self.db[name] then
+        self.db[name] = {}
     end
 
     -- These player objects are generating a lot of garbage. Since they don't
     -- have per-insance state, it is much better to have a single instance per
     -- player.
     if not self.player_cache[name] then
-        self.player_cache[name] = self:NewPlayer(self, name, self.data[name])
+        self.player_cache[name] = self:NewPlayer(self, name, self.db[name])
     end
     return self.player_cache[name]
 end
@@ -53,28 +90,22 @@ end
 -- filterfunc is called with name
 -- sortfunc is called with the names of the players tro be compared
 function obj:GetIterator(filterfunc, sortfunc)
-    local tmp = {}
     local res = {}
+
     -- Pick up players from online people, registered users, and players assigned
     -- to roles.
 
-    for name in Guild:GetIterator("NAME", false) do
-        tmp[name] = true
-    end
-
-    for name in self.state:RegistrationIterator() do
-        tmp[name] = true
-    end
-
-    for name in self.state:AssignmentsIterator() do
-        tmp[name] = true
-    end
-
-    for name in pairs(tmp) do
-        tmp[name] = nil
-        local player = self:Get(name)
-        if not filterfunc or filterfunc(player) then
-            table.insert(res, player)
+    for _, source in pairs(self.sources) do
+        for _, item in source.iter() do
+            ZRO:Print(source.GetName(item))
+            local name = source.GetName(item)
+            local player = self:Get(name)
+            if ( player and
+                 not filterfunc or
+                 filterfunc(player) )
+            then
+                table.insert(res, player)
+            end
         end
     end
 
@@ -110,32 +141,33 @@ end
 
 -- These two helper functions make sure changes are replicated for both entries
 
-local function set_role(record_name, role)
+local function set_role(self, record_name, role)
     local role = string.lower(role or "unknown")
     -- Update the player role with the new one unless the role is
     -- unknown. If the player role is not recorded yet, just stick
     -- anything we have (including unknown) to it.
     self.record[record_name] = role
+    self.playerdata:OnPlayerChanged(self:GetName())
 end
 
-local function get_role(record_name)
+local function get_role(self, record_name)
     return string.lower(self.record[record_name] or "unknown")
 end
 
 function Player:SetPrimaryRole(role)
-    set_role("primary_role", role)
+    set_role(self, "primary_role", role)
 end
 
 function Player:GetPrimaryRole()
-    return get_role("primary_role")
+    return get_role(self, "primary_role")
 end
 
 function Player:SetSecondaryRole(role)
-    set_role("secondary_role", role)
+    set_role(self, "secondary_role", role)
 end
 
 function Player:GetSecondaryRole()
-    return get_role("secondary_role")
+    return get_role(self, "secondary_role")
 end
 
 -- Select the active role:
@@ -143,6 +175,7 @@ end
 --   2 - offspec
 function Player:SetSelectedRole(selected)
     self.record.selected_role = selected
+    self.playerdata:OnPlayerChanged(self:GetName())
 end
 
 function Player:GetSelectedRole()
@@ -182,6 +215,7 @@ do
         if cur_date ~= last_date then
             table.insert(get_dates(player, table_name), curDate)
         end
+        self.playerdata:OnPlayerChanged(self:GetName())
     end
 
     local function remove_date(player, table_name)
@@ -190,6 +224,7 @@ do
         if  cur_date == last_date then
             table.remove(get_dates(player, table_name))
         end
+        self.playerdata:OnPlayerChanged(self:GetName())
     end
 
     -- Types of date sets we'll keep
@@ -288,11 +323,13 @@ function Player:GetAssignment()
 end
 
 function Player:SetAssignment(assignment)
-    return self.playerData.state:SetAssignment(self.name, assignment)
+    self.playerData.state:SetAssignment(self.name, assignment)
+    self.playerdata:OnPlayerChanged(self:GetName())
 end
 
 function Player:RemoveAssignment()
-    return self.playerData.state:RemoveAssignment(self.name)
+    self.playerData.state:RemoveAssignment(self.name)
+    self.playerdata:OnPlayerChanged(self:GetName())
 end
 
 function Player:GetClassColor()

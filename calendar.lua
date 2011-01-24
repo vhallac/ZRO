@@ -9,15 +9,10 @@ local Calendar = uOO:NewClass("Calendar",
                                 events = {}
                             })
 
-
-function Calendar:Initialize()
-    if not self.callbacks then
-        self.callbacks = LibStub("CallbackHandler-1.0"):New(self)
+function Calendar:Construct()
+    if not self.class.callbacks then
+        self.class.callbacks = LibStub("CallbackHandler-1.0"):New(self.class)
     end
-end
-
-function Calendar:Finalize()
-    -- Unregister all events?
 end
 
 -- The code below is going to be tricky. As usual, events are involved in
@@ -86,7 +81,7 @@ do
         [9] = const.UNSURE,
     }
     onOpenEvent = function(self)
-        local numInvites = CalendarGetNumInvites()
+        local numInvites = CalendarEventGetNumInvites()
         local inviteTbl = {}
         for i=1, numInvites do
             local name, level, className, classFileName, inviteStatus, modStatus, inviteIsMine, inviteType = CalendarEventGetInvite(index)
@@ -97,9 +92,6 @@ do
         end
         coroutine.resume(coCalendarQuery, inviteTbl)
     end
-end
-
-function Calendar:Construct()
 end
 
 -- Class method
