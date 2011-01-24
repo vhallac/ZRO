@@ -3,18 +3,13 @@ local ZRO = addonTable.ZRO
 local uOO = addonTable.uOO
 local const = addonTable.const
 
-local Guild = uOO:NewClass("Guild",
-                           {
-                               initialized = false,
-                               memberList = {},
-                           })
+local Guild = uOO.object:clone()
+local initialized = false
+local memberList = {}
+local callbacks = callbacks = LibStub("CallbackHandler-1.0"):New(Guild)
 
--- This is a class method
 function Guild:Initialize()
-    if not self.initialized then
-        if not self.callbacks then
-            self.callbacks = LibStub("CallbackHandler-1.0"):New(self)
-        end
+    if not initialized then
         ZRO:RegisterEvent("GUILD_ROSTER_UPDATE", self.GuildUpdate, self)
         ZRO:RegisterEvent("PLAYER_GUILD_UPDATE", self.PlayerUpdate, self)
 
@@ -31,11 +26,8 @@ function Guild:Finalize()
         initialized = false
         ZRO:UnregisterEvent("PLAYER_GUILD_UPDATE")
         ZRO:UnregisterEvent("GUILD_ROSTER_UPDATE")
-        self.callbacks:UnregisterAllCallbacks()
+        callbacks:UnregisterAllCallbacks()
     end
-end
-
-function Guild:Construct()
 end
 
 function Guild:GuildUpdate(event, arg1)
@@ -54,11 +46,11 @@ function Guild:PlayerUpdate(unit)
     if IsInGuild() then
         -- Joined a guild. Good for me!
         GuildRoster()
-        self.callbacks:Fire("JoinedGuild")
+        callbacks:Fire("JoinedGuild")
     else
         -- Not in guild, clear the member list (except myself)
         self:ClearAll(false)
-        self.callbacks:Fire("LeftGuild")
+        callbacks:Fire("LeftGuild")
     end
 end
 
@@ -80,12 +72,12 @@ function Guild:SyncMembers()
 
         local player
         if name then
-            if not self.players[name] then
+            if not memberList[name] then
                 player = {}
-                self.players[name] = player
+                memberList[name] = player
                 player.new = true -- Processed and cleared later
             else
-                player = self.players[name]
+                player = memberList[name]
             end
 
             player.name = name -- I know it is redundant, but speeds things up
@@ -113,14 +105,14 @@ function Guild:SyncMembers()
 
     for name, player in pairs(self.memberList) do
         if player.oldOnline ~= player.online then
-            self.callbacks:Fire(player.online and
-                                "MemberConnected" or
-                                "MemberDisconnected", name)
+            callbacks:Fire(player.online and
+                           "MemberConnected" or
+                           "MemberDisconnected", name)
         end
         player.oldOnline = nil
 
         if not player.updated then
-            self.callbacks:Fire("MemberRemoved", name)
+            callbacks:Fire("MemberRemoved", name)
              -- reduce garbage by creating table only when needed
             if not deleteList then deleteList = {} end
             table.insert(deleteList, name)
@@ -128,7 +120,7 @@ function Guild:SyncMembers()
         player.updated = nil
 
         if player.new then
-            self.callbacks:Fire("MemberAdded", name)
+            callbacks:Fire("MemberAdded", name)
             player.new = nil
         end
     end
@@ -137,7 +129,7 @@ end
 function Guild:ClearAll(shouldClearSelf)
     for name, _ in pairs(self.memberList) do
         memberList[name] = nil
-        self.callbacks:Fire("PlayerRemoved", name)
+        callbacks:Fire("PlayerRemoved", name)
     end
 end
 
@@ -183,13 +175,13 @@ end
 -- Create a list of accessor functions
 do
     -- Return the member information structure.
-    local function get_info(self, name)
-        return self.memberList and self.memberList[name]
+    local function get_info(name)
+        return memberList and memberList[name]
     end
 
-    local function get_data(self, nameOrInfo, member, default)
+    local function get_data(nameOrInfo, member, default)
         if type(nameOrInfo) == "string" then
-            nameOrInfo = get_info(self, nameOrInfo)
+            nameOrInfo = get_info(nameOrInfo)
         end
         return nameOrInfo and nameOrInfo[member] or default
     end
@@ -209,12 +201,12 @@ do
 
     for _, data in ipairs(accessors) do
         Guild[data[1]] = function(self, nameOrInfo)
-            get_data(self, nameOrInfo, data[2], data[3])
+            get_data(nameOrInfo, data[2], data[3])
         end
     end
 
     function Guild:HasMember(name)
-        return get_info(self, name) and true or false
+        return get_info(name) and true or false
     end
 end
 
@@ -236,3 +228,8 @@ end
 -- call every n seconds (15 or 60 are the ones I've seen). Don't forget to
 -- disable this when guild page is opened (check if it still causes problems
 -- first), or when player enters combat.
+
+-- Don't allow cloning this
+Guild:lock()
+
+uOO.Guild = Guild

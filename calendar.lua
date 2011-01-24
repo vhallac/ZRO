@@ -4,21 +4,9 @@ local ZRO   = addonTable.ZRO
 local uOO   = addonTable.uOO
 local const = addonTable.const
 
-local Calendar = uOO:NewClass("Calendar",
-                            {
-                                events = {}
-                            })
-
-
-function Calendar:Initialize()
-    if not self.callbacks then
-        self.callbacks = LibStub("CallbackHandler-1.0"):New(self)
-    end
-end
-
-function Calendar:Finalize()
-    -- Unregister all events?
-end
+local Calendar = uOO.object:clone()
+local events = {}
+local callbacks = LibStub("CallbackHandler-1.0"):New(Calendar)
 
 -- The code below is going to be tricky. As usual, events are involved in
 -- collecting the information we are after. To simplify the code, I will use
@@ -53,7 +41,7 @@ do
 
             local title, hour, minute, calendarType, sequenceType, eventType, texture, modStatus, inviteStatus, invitedBy, difficulty, inviteType = CalendarGetDayEvent(0, day, i)
             if ( calendarType == "PLAYER" or
-             calendarType == "GUILD_EVENT" )
+                 calendarType == "GUILD_EVENT" )
             then
                 -- These are the types of events people can sign up to. Get invite
                 -- information, and create an entry for it.
@@ -65,7 +53,7 @@ do
                 if members then
                     -- If we got something meaningful, create invite status
                     -- field for the events.
-                    self.events[title] = members
+                    events[title] = members
                 end
             end
 
@@ -74,7 +62,7 @@ do
         ZRO:UnregisterEvent("CALENDAR_OPEN_EVENT")
 
         -- Let the interested parties know that we are done.
-        self.callbacks:Fire("CalendarLoaded")
+        callbacks:Fire("CalendarLoaded")
     end
 
     local inviteStatusMap = {
@@ -99,10 +87,6 @@ do
     end
 end
 
-function Calendar:Construct()
-end
-
--- Class method
 function Calendar:GetDate()
     local dow, mon, day, year = CalendarGetDate()
     local hour, min = GetGameTime()
@@ -118,8 +102,9 @@ function Calendar:GetDate()
     return dow, mon, day, year
 end
 
--- Class method
 function Calendar:GetDateString()
     local _, mon, day, year = self:GetDate()
     return string.format("%02d/%02d/%04d", mon, day, year)
 end
+
+uOO.Calendar = Calendar

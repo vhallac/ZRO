@@ -5,60 +5,64 @@ local ZRO = addonTable.ZRO
 local uOO = addonTable.uOO
 local const = addonTable.const
 
-local obj = uOO:NewClass("PlayerData",
-                         {
-                             player_cache={},
-                             db={}
-                         })
+-- We'll keep cloning this and hand it out to people who ask for them
+local Player = uOO.object:clone()
 
-function obj:Construct()
-    if not self.class.state then
-        -- stop the infinite loop
-        self.class.state = true
-        self.class.state = uOO:Construct("State")
+local PlayerData = uOO.object:clone()
+local player_cache=setmetatable({}, {__mode="kv"})
+local db = {}
+local roster
+local guild
+
+function PlayerData:Construct()
+    if not roster then
+        roster = uOO.Roster
     end
 
-    if not self.class.roster then
-        self.class.roster = uOO:Construct("Roster")
+    if not guild then
+        guild = uOO.Guild
     end
 end
 
 -- Set the backing store for the class. If this is not called very early, some
 -- of the data we store will get lost. If it is not called at all, the data will
 -- not persist.
-function obj:SetDataStore(db)
-    self.db = data
+function PlayerData:SetDataStore(new_db)
+    db = new_db
 end
 
-function obj:Get(name)
-    if not self.data[name] then
-        self.data[name] = {}
+function PlayerData:Get(name)
+    if not db[name] then
+        db[name] = {}
     end
 
     -- These player objects are generating a lot of garbage. Since they don't
     -- have per-insance state, it is much better to have a single instance per
     -- player.
-    if not self.player_cache[name] then
-        self.player_cache[name] = self:NewPlayer(self, name, self.data[name])
+    local player = player_cache[name]
+    if not player then
+        player = self:NewPlayer(name, db[name])
+        player_cache[name] = player
     end
-    return self.player_cache[name]
+    return player
 end
 
-function obj:NewPlayer(playerdata, name, record)
-    return uOO:Construct("Player", playerdata, name, record)
+function PlayerData:NewPlayer(name, record)
+    local player = Player:clone()
+    player:Initialize(self, name, record)
+    return player
 end
-
 
 -- Get an iterator for known players in assigned list.
 -- filterfunc is called with name
 -- sortfunc is called with the names of the players tro be compared
-function obj:GetIterator(filterfunc, sortfunc)
+function PlayerData:GetIterator(filterfunc, sortfunc)
     local tmp = {}
     local res = {}
     -- Pick up players from online people, registered users, and players assigned
     -- to roles.
 
-    for name in Guild:GetIterator("NAME", false) do
+    for name in guild:GetIterator("NAME", false) do
         tmp[name] = true
     end
 
@@ -98,7 +102,7 @@ end
 -- state management.
 Player = uOO:NewClass("Player", {})
 
-function Player:Construct(playerdata, name, record)
+function Player:Initialize(playerdata, name, record)
     self.playerData = playerdata
     self.name = name
     self.record = record
@@ -218,21 +222,21 @@ do
 end
 
 function Player:GetGuildRank()
-    return self:IsInGuild() and Guild:GetRank(self.name) or "N/A"
+    return self:IsInGuild() and guild:GetRank(self.name) or "N/A"
 end
 
 function Player:GetGuildNote()
-    return self:IsInGuild() and Guild:GetNote(self.name) or "N/A"
+    return self:IsInGuild() and guild:GetNote(self.name) or "N/A"
 end
 
 function Player:IsOnline()
     -- It is not easy to determine non-guildies online status.
     -- For now, report online for everyone not in guild.
-    return not self:IsInGuild() or Guild:IsMemberOnline(self.name)
+    return not self:IsInGuild() or guild:IsMemberOnline(self.name)
 end
 
 function Player:GetClass()
-    return self:IsInGuild() and Guild:GetClass(self.name) or "unknown"
+    return self:IsInGuild() and guild:GetClass(self.name) or "unknown"
 end
 
 function Player:GetTooltipText()
@@ -296,14 +300,16 @@ function Player:RemoveAssignment()
 end
 
 function Player:GetClassColor()
-    return Guild:GetClassColor(self.name)
+    return guild:GetClassColor(self.name)
 end
 
 function Player:IsInGuild()
-    return Guild:HasMember(self.name)
+    return guild:HasMember(self.name)
 end
 
 function Player:IsInRaid()
     -- TODO: Move roster functionality to playerdata
     return self.playerData.roster:IsPlayerInRaid(self.name)
 end
+
+uOO.PlayerData = PlayerData

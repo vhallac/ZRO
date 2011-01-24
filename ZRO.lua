@@ -32,19 +32,19 @@ end
 
 function ZRO:OnEnable()
     -- Set up the data stores of classes that need persistence
-    uOO:GetClass("PlayerData"):SetDataStore(ZRO_PlayerData)
+    uOO.PlayerData:SetDataStore(ZRO_PlayerData)
 
     -- Attempt to obtain calendar information
-    local calendarClass = uOO:GetClass("Calendar")
-    calendarClass:Initialize()
-    calendarClass:RegisterCallback("CalendarLoaded", self.OnCalendarLoaded, self)
-    calendarClass:LoadEvents()
+    local calendar = uOO.Calendar
+    calendar:Initialize()
+    calendar:RegisterCallback("CalendarLoaded", self.OnCalendarLoaded, self)
+    calendar:LoadEvents()
 end
 
 function ZRO:OnDisable()
-    local calendarClass = uOO:GetClass("Calendar")
-    calendarClass:UnregisterCallback("CalendarLoaded")
-    calendarClass:Finalize()
+    local calendar = uOO:Calendar
+    calendar:UnregisterCallback("CalendarLoaded")
+    calendar:Finalize()
 end
 
 
