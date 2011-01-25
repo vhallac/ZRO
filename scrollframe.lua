@@ -15,14 +15,14 @@ local handle_vertical_scroll
 --[[
 Parameters:
   scrollframe: The ScrollFrame object that this object will control
-  buttonTemplateName: The name of the button template we will use to display
-                      the item data
-  displayItem: The function we call to display the item. The parameters that
-               we will use to call this function are itemButton and
-               itemIndex. itemButton is the button frame that will display
-               the data, and itemIndex is the index of the item in the
-               scroll list to display. itemIndex can be greater than the
-               actual number of items handled by the scroller.
+  buttonFactory: The name of the button factory we will use to create scroll
+                 frame buttons that display data
+  model: The model that contains the list displayed by the scroll frame. It
+         provides two callbacks: ListChanged, ItemChanged; and has the following
+         functions implemented: GetItemCount, GetItem.
+
+  It is the responsibility of the caller of this function to ensure that
+  buttonFactory matches the model.
 --]]
 function ScrollFrame:Initialize(scrollframe, buttonFactory, model)
     self.scroller = scrollframe
@@ -47,7 +47,7 @@ function ScrollFrame:Initialize(scrollframe, buttonFactory, model)
                                handle_vertical_scroll(self, scrollframe)
                            end,
                            self)
-    model:RegisterCallback("PlayerDataChanged",
+    model:RegisterCallback("ItemChanged",
                            self.OnItemChanged,
                            self)
 end
@@ -87,7 +87,7 @@ handle_vertical_scroll = function (self, frame)
         local itemIdx = topIdx + i
         local itemButton = self.buttons:Get(i)
         -- This can pass nil to button, which causes it to be hidden
-        itemButton:SetPlayer(self.model:GetPlayer(itemIdx))
+        itemButton:SetModel(self.model:GetItem(itemIdx))
         itemButton:Update()
     end
 end

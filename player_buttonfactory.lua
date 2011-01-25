@@ -48,8 +48,8 @@ function Button:Initialize(factory, uiButton, index)
     end
 end
 
-function Button:SetPlayer(player)
-    self.player = player
+function Button:SetModel(model)
+    self.player = model
 end
 
 function Button:Update()

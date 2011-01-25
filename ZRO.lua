@@ -57,11 +57,7 @@ function ZRO:OnDisable()
     uOO.Guild:Finalize()
 end
 
-
 --- TEMP
-function ZRO:OnUpdateScroll(frame)
-end
-
 function ZRO:OnCalendarLoaded()
     self:Print("Calendar loaded. No idea how.")
 end

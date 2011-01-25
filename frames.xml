@@ -191,6 +191,7 @@
     </Frame>
 
     <Frame name="ZROPlayerListTemplate" virtual="true">
+        <Size x="320" y="500"/>
         <Layers>
             <Layer>
                 <FontString name="$parentTitle" inherits="TitleFontTplt" text="Player List">
@@ -214,21 +215,9 @@
                         <Offset x="0" y="-20"/>
                     </Anchor>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$parentFilterSettings" relativePoint="TOPRIGHT">
-                        <Offset x="0" y="10"/>
+                        <Offset x="-40" y="10"/>
                     </Anchor>
                 </Anchors>
-                <Scripts>
-                    <OnLoad>
-                        <!-- TODO: Not sure if I will use this -->
-                        self:GetParent().scroller = self
-                    </OnLoad>
-                    <OnVerticalScroll>
-                        ZRO:OnVerticalScroll(self)
-                    </OnVerticalScroll>
-                    <OnShow>
-                        ZRO:OnUpdateScroll(self)
-                    </OnShow>
-                </Scripts>
             </ScrollFrame>
         </Frames>
     </Frame>
@@ -261,7 +250,7 @@
         </Layers>
         <Frames>
             <Button name="$parentNewRaid" inherits="UIPanelButtonTemplate" text="+">
-                <Size x="20" y="20"/>
+                <Size x="25" y="25"/>
                 <Anchors>
                     <Anchor point="TOPLEFT">
                         <Offset x="0" y="-25"/>
@@ -276,8 +265,11 @@
             <Frame name="$parentRaidSelect" inherits="UIDropDownMenuTemplate">
                 <Size x="290" y="20"/>
                 <Anchors>
-                    <Anchor point="LEFT" relativeTo="$parentNewRaid" relativePoint="RIGHT">
-                        <Offset x="5" y="0"/>
+                    <Anchor point="TOPLEFT" relativeTo="$parentNewRaid" relativePoint="TOPRIGHT">
+                        <Offset x="-10" y="1"/>
+                    </Anchor>
+                    <Anchor point="RIGHT">
+                        <Offset x="-40" y="0"/>
                     </Anchor>
                 </Anchors>
             </Frame>
@@ -291,18 +283,6 @@
                         <Offset x="0" y="10"/>
                     </Anchor>
                 </Anchors>
-                <Scripts>
-                    <OnLoad>
-                        <!-- TODO: Not sure if I will use this -->
-                        self:GetParent().scroller = self
-                    </OnLoad>
-                    <OnVerticalScroll>
-                        ZRO:OnVerticalScroll(self)
-                    </OnVerticalScroll>
-                    <OnShow>
-                        ZRO:OnUpdateScroll(self)
-                    </OnShow>
-                </Scripts>
             </ScrollFrame>
             <Button name="$parentLeaveRaid" inherits="UIPanelButtonTemplate" text="Leave Raid">
                 <Size x="100" y="20"/>
@@ -412,6 +392,9 @@
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeTo="$parentPlayerList" relativePoint="TOPRIGHT">
                         <Offset x="10" y="0"/>
+                    </Anchor>
+                    <Anchor point="BOTTOMRIGHT">
+                        <Offset x="-20" y="30"/>
                     </Anchor>
                 </Anchors>
             </Frame>
