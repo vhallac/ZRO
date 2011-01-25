@@ -9,15 +9,9 @@ local players = {}
 local indexMap = {}
 local callbacks = LibStub("CallbackHandler-1.0"):New(PlayerListModel)
 local eventSelector
-local playerData
-local controller
+playerData = nil
 
 function PlayerListModel:Initialize()
-    -- TODO: Think a bit more about how to do this.
-    local scroller = _G["ZRODialogPlayerListScrollList"]
-    controller = uOO.ScrollFrame:clone()
-    controller:Initialize(scroller, "ZROPlayerTemplate", self)
-
     if not eventSelector then
         eventSelector = uOO.EventListModel
     end
@@ -25,7 +19,7 @@ function PlayerListModel:Initialize()
     if not playerData then
         playerData = uOO.PlayerData
 
-        -- Make it into a class callback
+        playerData:RegisterCallback("ListUpdate", self.BuildPlayerList, self)
         playerData:RegisterCallback("PlayerDataChanged", self.OnPlayerDataChanged, self.class)
     end
 
@@ -35,19 +29,15 @@ end
 function PlayerListModel:BuildPlayerList()
     -- Clear the player list
     while #players > 0 do
-        print(players[#players], players[#players]:GetName())
         indexMap[players[#players]:GetName()] = nil
         table.remove(players)
     end
 
     -- TODO: Add filter and sort functions
     for i, player in playerData:GetIterator(nil, nil) do
-        ZRO:Print(i, player:GetName())
         table.insert(players, player)
         indexMap[player:GetName()] = #players
     end
-
-    controller:SetItemCount(#players)
 
     callbacks:Fire("ListChanged")
 end
@@ -60,16 +50,12 @@ function PlayerListModel:OnPlayerDataChanged(player)
     end
 end
 
-function PlayerListModel:DisplayItem(itemBtn, itemIdx)
-    local player = players[itemIdx]
-    if player then
-        local prefix = itemBtn:GetName()
+function PlayerListModel:GetItemCount()
+    return #players
+end
 
-        _G[prefix.."Name"]:SetText(player:GetName())
-        itemBtn:Show()
-    else
-        itemBtn:Hide()
-    end
+function PlayerListModel:GetPlayer(itemIdx)
+    return players[itemIdx]
 end
 
 PlayerListModel:lock()

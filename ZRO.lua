@@ -29,13 +29,13 @@ local options = {
 
 function ZRO:OnInitialize()
     -- Localize the UI
-    uOO.UiText:LocalizeControls()
+    uOO.UiSetup:LocalizeControls()
 end
 
 function ZRO:OnEnable()
     -- Set up the data stores of classes that need persistence
     uOO.PlayerData:SetDataStore(ZRO_PlayerData)
-    uOO.FilterSettings:SetDataStore(ZRO_Settings.filters)
+    uOO.FilterSettingsModel:SetDataStore(ZRO_Settings.filters)
     uOO.Guild:Initialize()
     uOO.Roster:Initialize()
     uOO.PlayerData:Initialize()
@@ -46,6 +46,8 @@ function ZRO:OnEnable()
     calendar:LoadEvents()
 
     uOO.PlayerListModel:Initialize()
+
+    uOO.UiSetup:Initialize()
 end
 
 function ZRO:OnDisable()

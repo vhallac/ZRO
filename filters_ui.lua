@@ -3,16 +3,16 @@ local L = LibStub("AceLocale-3.0"):GetLocale("ZRO", true)
 local addonName, addonTable = ...
 local uOO = addonTable.uOO
 
-local FilterSettingsUi = uOO.object:clone()
+local FilterSettingsMediator = uOO.object:clone()
 local filterButtons = {}
 local model
 
-function FilterSettingsUi:Initialize()
-    if not model then
-        model = uOO.FilterSettings
-    end
+function FilterSettingsMediator:Initialize(new_model)
+    model = new_model
 
     -- Bind toggle values to the model
+    -- I could have isolated this away a bit more, but that would be a somewhat
+    -- pointless excercise.
     local checkButtonsPrefix = "ZRODialogPlayerListFilterSettings"
     local buttons = {
         Tank = "ShowTank",
@@ -41,8 +41,12 @@ function FilterSettingsUi:Initialize()
     model:RegisterCallback("ValueChanged", self.ModelChanged, self)
 end
 
-function FilterSettingsUi:ModelChanged()
+function FilterSettingsMediator:ModelChanged()
     for _, btn in ipairs(filterButtons) do
         btn:SetChecked(model["Get"..btn.SettingName](model))
     end
 end
+
+FilterSettingsMediator:lock()
+
+uOO.FilterSettingsMediator = FilterSettingsMediator

@@ -5,6 +5,8 @@
 ## SavedVariables:
 ## LoadOnDemand: 0
 ## OptionalDeps:
+## LoadManagers: AddonLoader
+## X-LoadOn-Always: delayed
 
 embeds.xml
 
@@ -22,5 +24,6 @@ playerlist_m.lua
 # UI
 filters_ui.lua
 scrollframe.lua
+ui_setup.lua
+player_buttonfactory.lua
 frames.xml
-ui_text.lua

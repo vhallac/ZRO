@@ -35,12 +35,13 @@ function PlayerData:Initialize()
         guild:RegisterCallback("LeftGuild", self.OnGuildChanged, self)
         guild:RegisterCallback("MemberConnected", self.OnPlayerChanged, self)
         guild:RegisterCallback("MemberDisconnected", self.OnPlayerChanged, self)
-        guild:RegisterCallback("MemberRemoved", self.OnPlayerChanged, self)
-        guild:RegisterCallback("MemberAdded", self.OnPlayerChanged, self)
+        guild:RegisterCallback("MemberRemoved", self.OnGuildChanged, self)
+        guild:RegisterCallback("MemberAdded", self.OnGuildChanged, self)
     end
 end
 
 function PlayerData:OnGuildChanged()
+    -- This can create a storm of events at start. Do something about it.
     callbacks:Fire("ListUpdate")
 end
 
@@ -93,7 +94,6 @@ function PlayerData:GetIterator(filterfunc, sortfunc)
 
     for _, source in pairs(sources) do
         for _, item in source.iter() do
-            ZRO:Print(source.GetName(item))
             local name = source.GetName(item)
             local player = self:Get(name)
             if ( player and

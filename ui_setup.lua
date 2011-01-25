@@ -1,8 +1,11 @@
 local L = LibStub("AceLocale-3.0"):GetLocale("ZRO", true)
 
-local UiText = uOO.object:clone()
+local addonName, addonTable = ...
+local uOO = addonTable.uOO
 
-function UiText:LocalizeControls()
+local UiSetup = uOO.object:clone()
+
+function UiSetup:LocalizeControls()
     local playerListPrefix = "ZRODialogPlayerList"
     _G[playerListPrefix.."Title"]:SetText(L["Player List"])
     local filterBoxPrefix = playerListPrefix.."FilterSettings"
@@ -24,6 +27,25 @@ function UiText:LocalizeControls()
     _G[raidSetupPrefix.."RangedStatsLabel"]:SetText(L["Ranged"]..":")
 end
 
-UiText:lock()
+local initialized = false
+local playerListMediator
 
-uOO.UiText = UiText
+function UiSetup:Initialize()
+    if not initialized then
+        -- Bind the Player List scroll frame objects together
+        local playerListModel = uOO.PlayerListModel
+        playerListMediator = uOO.ScrollFrame:clone()
+        local buttonFactory = uOO.PlayerButtonFactory:clone()
+        local scroller = _G["ZRODialogPlayerListScrollList"]
+        playerListMediator:Initialize(scroller, buttonFactory, playerListModel)
+
+        -- Bind the Player List Filter Settings objects together
+        local filtersModel = uOO.FilterSettingsModel
+        local filtersMediator = uOO.FilterSettingsMediator
+        filtersMediator:Initialize(filtersModel)
+    end
+end
+
+UiSetup:lock()
+
+uOO.UiSetup = UiSetup
