@@ -22,7 +22,6 @@ calendar.lua
 filters.lua
 playerlist_m.lua
 # UI
-filters_ui.lua
 scrollframe.lua
 ui_setup.lua
 player_buttonfactory.lua
