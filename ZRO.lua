@@ -46,6 +46,7 @@ function ZRO:OnEnable()
     calendar:LoadEvents()
 
     uOO.PlayerListModel:Initialize()
+    uOO.RaidSetupsModel:Initialize()
 
     uOO.UiSetup:Initialize()
 end

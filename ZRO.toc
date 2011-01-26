@@ -21,8 +21,10 @@ roster.lua
 calendar.lua
 filters.lua
 playerlist_m.lua
+raidsetups_m.lua
 # UI
 scrollframe.lua
+dropdown.lua
 ui_setup.lua
 player_buttonfactory.lua
 frames.xml

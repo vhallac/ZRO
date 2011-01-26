@@ -29,6 +29,7 @@ end
 
 local initialized = false
 local playerListMediator
+local raidSetupsMediator
 
 function UiSetup:Initialize()
     if not initialized then
@@ -43,6 +44,19 @@ function UiSetup:Initialize()
         local filtersModel = uOO.FilterSettingsModel
         local filtersMediator = uOO.FilterSettingsMediator
         filtersMediator:Initialize(filtersModel)
+
+        local raidSetupsModel = uOO.RaidSetupsModel
+        raidSetupsMediator = uOO.DropDown:clone()
+        -- Fixup some of the DropdownMenu weirdness
+        local raidSetupsFrame = _G["ZRODialogRaidSetupRaidSelect"]
+        UIDropDownMenu_SetWidth(raidSetupsFrame, raidSetupsFrame:GetWidth()-20, 1)
+        UIDropDownMenu_SetButtonWidth(raidSetupsFrame, raidSetupsFrame:GetWidth()-40, 1)
+
+        local raidSetupsLabel = _G["ZRODialogRaidSetupRaidSelectText"]
+        raidSetupsLabel:SetJustifyH("LEFT")
+        raidSetupsLabel:SetPoint("LEFT", 30, 2)
+
+        raidSetupsMediator:Initialize(raidSetupsFrame, raidSetupsModel)
     end
 end
 
