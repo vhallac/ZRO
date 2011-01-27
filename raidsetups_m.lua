@@ -19,10 +19,8 @@ local lists = {}
 local selected = 1
 
 function RaidSetupsModel:Initialize()
-    local sitoutList = { GetName = function(self) return "Sitout" end }
-    self:AddItem(sitoutList)
-    local penaltyList = { GetName = function(self) return "Penalty" end }
-    self:AddItem(penaltyList)
+    self:AddItem(uOO.SitoutListModel)
+    self:AddItem(uOO.PenaltyListModel)
     self:SetSelectedItem(1)
     -- TODO: Go throught the player list and add necessary raid list items
     -- TODO2: Have the raids in the main list, and handle sitout and penalty as
@@ -34,6 +32,7 @@ function RaidSetupsModel:SetSelectedItem(index)
     if index <= self:GetItemCount() then
         selected = index
         callbacks:Fire("SelectionChanged", index)
+        self:GetProxyForSelected():Fire("ListChanged")
     end
 end
 
@@ -50,10 +49,47 @@ function RaidSetupsModel:GetItemCount()
 end
 
 function RaidSetupsModel:AddItem(item)
+    local function fire_if_selected(item, event, ...)
+        if self:GetSelectedItem() == item then
+            self.active:Fire(event, ...)
+        end
+    end
+
     table.insert(lists, item)
+    -- Add proxy event handlers
+    item.RegisterCallback(self, "ItemChanged", fire_if_selected, item)
+    item.RegisterCallback(self, "ListChanged", fire_if_selected, item)
+
     callbacks:Fire("ListChanged")
 end
 
+function RaidSetupsModel:GetProxyForSelected()
+    return self.active
+end
+
+-- This is an object that represents the active list. It implements the
+-- interface necessary for scroll frame mediators.
+RaidSetupsModel.active = uOO.object:clone()
+local activeList = RaidSetupsModel.active
+
+activeList.owner = RaidSetupsModel
+activeList.callbacks = LibStub("CallbackHandler-1.0"):New(activeList)
+
+function activeList:GetItemCount()
+    local active = self.owner:GetSelectedItem()
+    return active and active:GetItemCount()
+end
+
+function activeList:GetItem(index)
+    local active = self.owner:GetSelectedItem()
+    return active and active:GetItem(index)
+end
+
+function activeList:Fire(event, ...)
+    self.callbacks:Fire(event, ...)
+end
+
+activeList:lock()
 RaidSetupsModel:lock()
 
 uOO.RaidSetupsModel = RaidSetupsModel

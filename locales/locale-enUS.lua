@@ -17,3 +17,6 @@ L["Have Penalty"] = true
 L["Raid Setup"] = true
 L["Leave Raid"] = true
 L["Invite"] = true
+L["Sitouts"] = true
+L["Penalties"] = true
+L["Raid Group: "] = true

@@ -52,11 +52,19 @@ function UiSetup:Initialize()
         UIDropDownMenu_SetWidth(raidSetupsFrame, raidSetupsFrame:GetWidth()-20, 1)
         UIDropDownMenu_SetButtonWidth(raidSetupsFrame, raidSetupsFrame:GetWidth()-40, 1)
 
+        -- Raid selection combo
         local raidSetupsLabel = _G["ZRODialogRaidSetupRaidSelectText"]
         raidSetupsLabel:SetJustifyH("LEFT")
         raidSetupsLabel:SetPoint("LEFT", 30, 2)
 
         raidSetupsMediator:Initialize(raidSetupsFrame, raidSetupsModel)
+
+        -- Selected group player list
+        raidListMediator = uOO.ScrollFrame:clone()
+        local buttonFactory = uOO.PlayerButtonFactory:clone()
+        local scroller = _G["ZRODialogRaidSetupScrollList"]
+        raidListMediator:Initialize(scroller, buttonFactory,
+                                    raidSetupsModel:GetProxyForSelected())
     end
 end
 

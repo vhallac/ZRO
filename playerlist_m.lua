@@ -90,6 +90,10 @@ function SitoutListModel:RemoveItem(player)
     player:RemoveSitout()
 end
 
+function SitoutListModel:GetName()
+    return L["Sitouts"]
+end
+
 SitoutListModel:lock()
 uOO.SitoutListModel = SitoutListModel
 
@@ -110,6 +114,10 @@ end
 function PenaltyListModel:RemoveItem(player)
     player:RemovePenalty()
     self:BuildPlayerList()
+end
+
+function PenaltyListModel:GetName()
+    return L["Penalties"]
 end
 
 PenaltyListModel:lock()
@@ -137,6 +145,10 @@ end
 function RaidListModel:RemoveItem(player)
     player:RemoveFromRaid()
     self:BuildPlayerList()
+end
+
+function RaidListModel:GetName()
+    return L["Raid Group: "]..tostring(self.raidNumber)
 end
 
 uOO.RaidListModel = RaidListModel

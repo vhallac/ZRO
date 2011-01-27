@@ -276,7 +276,7 @@
             <ScrollFrame name="$parentScrollList" inherits="FauxScrollFrameTemplate">
                 <Size x="310" y="400"/>
                 <Anchors>
-                    <Anchor point="TOPLEFT" relativeTo="$parentFilterSettings" relativePoint="BOTTOMLEFT">
+                    <Anchor point="TOPLEFT" relativeTo="$parentNewRaid" relativePoint="BOTTOMLEFT">
                         <Offset x="0" y="-5"/>
                     </Anchor>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$parentLeaveRaid" relativePoint="TOPRIGHT">
