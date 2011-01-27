@@ -84,9 +84,9 @@ function PlayerData:NewPlayer(name, record)
 end
 
 -- Get an iterator for known players in assigned list.
--- filterfunc is called with name
--- sortfunc is called with the names of the players tro be compared
-function PlayerData:GetIterator(filterfunc, sortfunc)
+-- filterfunc is called with the player object
+function PlayerData:GetIterator(filterfunc)
+    local tmp = {}
     local res = {}
 
     -- Pick up players from online people, registered users, and players assigned
@@ -100,13 +100,12 @@ function PlayerData:GetIterator(filterfunc, sortfunc)
                  not filterfunc or
                  filterfunc(player) )
             then
-                table.insert(res, player)
+                if not tmp[player] then
+                    table.insert(res, player)
+                    tmp[player] = true
+                end
             end
         end
-    end
-
-    if sortfunc then
-        table.sort(res, sortfunc)
     end
 
     local i = 0

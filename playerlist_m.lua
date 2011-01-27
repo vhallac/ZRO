@@ -11,39 +11,114 @@ function PlayerListModel:Initialize()
     self.callbacks = LibStub("CallbackHandler-1.0"):New(self)
 
     uOO.PlayerData.RegisterCallback(self, "ListUpdate", "BuildPlayerList")
-    uOO.PlayerData.RegisterCallback(self, "PlayerDataChanged", "OnPlayerDataChanged")
+    uOO.PlayerData.RegisterCallback(self, "PlayerUpdate", "OnPlayerUpdate")
 
     -- Inject 'self' to filter function
     self.filter_func = function(item)
-        return self:FilterFunc(item)
+        return not self.FilterFunc or self:FilterFunc(item)
     end
     self:BuildPlayerList()
 end
 
 function PlayerListModel:BuildPlayerList()
-    -- Clear the player list
-    while #self.players > 0 do
-        self.indexMap[self.players[#self.players]:GetName()] = nil
-        table.remove(self.players)
+    local modified = false
+
+    -- Get the new list of players, and add them to our existing list.
+    -- At the end of this loop, indexMap is either -1 to indicate that the
+    -- player should be in our final list, or a positive value, which indicates
+    -- that the player in the position it points to is no longer in the list and
+    -- should be removed.
+    for i, player in uOO.PlayerData:GetIterator(self.filter_func) do
+        if not self.indexMap[player:GetName()] then
+            -- New entry. Add it, and set index as the negative value to be sure
+            -- it is not removed at later steps
+            table.insert(self.players, player)
+            modified = true
+        end
+        -- mark existing entries
+        self.indexMap[player:GetName()] = -1
     end
 
-    -- TODO: Add filter and sort functions
-    for i, player in uOO.PlayerData:GetIterator(self.filter_func, nil) do
-        table.insert(self.players, player)
-        self.indexMap[player:GetName()] = #self.players
+    -- Now, detect entries that were removed
+    for i=1,#self.players do
+        local name = self.players[i]:GetName()
+        if self.indexMap[name] > 0 then
+            -- Item was removed. Get rid of it
+            self.indexMap[name] = nil
+            table.remove(self.players, i)
+            modified = true
+        end
     end
+
+    -- Sort the list
+    if self.SortFunc then
+        table.sort(self.players,
+                   function(p1, p2)
+                       return self:SortFunc(p1, p2)
+                   end)
+    end
+
+    -- reindex
+    self:IndexItems()
 
     self.callbacks:Fire("ListChanged")
 end
 
-function PlayerListModel:OnPlayerDataChanged(event, player)
+function PlayerListModel:IndexItems(startPos)
+    for i= startPos or 1, #self.players do
+        local name = self.players[i]:GetName()
+        self.indexMap[name] = i
+    end
+end
+
+function PlayerListModel:OnPlayerUpdate(event, player)
+    -- Copied from http://lua-users.org/wiki/BinaryInsert
+    local function bininsert(t, value, fcomp)
+        --  Initialise numbers
+        local iStart,iEnd,iMid,iState = 1,#t,1,0
+        -- Get insert position
+        while iStart <= iEnd do
+            -- calculate middle
+            iMid = math.floor( (iStart+iEnd)/2 )
+            -- compare
+            if fcomp( value,t[iMid] ) then
+                iEnd,iState = iMid - 1,0
+            else
+                iStart,iState = iMid + 1,1
+            end
+        end
+        table.insert( t,(iMid+iState),value )
+        return (iMid+iState)
+    end
+
     -- Re-fire the event with different parameters.
     local idx = self.indexMap[player:GetName()]
-    if idx then
-        self.callbacks:Fire("ItemChanged", idx)
+    if idx and not self:FilterFunc(player) then
+        -- We had the player in our list, but the change made it go away.
+        -- Delete the entries, and signal a list changed event
+        table.remove(self.players, idx)
+        self:IndexItems(idx)
+        self.callbacks:Fire("ListChanged")
+    elseif not idx and self:FilterFunc(player) then
+        -- We didn't have the player in list, but the change added it.
+        if self.SortFunc then
+            idx = bininsert(self.players, player,
+                            function(p1, p2)
+                                return self:SortFunc(p1, p2)
+                            end)
+        else
+            table.insert(self.players, player)
+            idx = #self.players
+        end
+
+        self:IndexItems(idx)
+        self.callbacks:Fire("ListChanged")
+    else
+        -- No change to the list. Signal an item modification if we had it in list.
+        if idx then
+            self.callbacks:Fire("ItemChanged", idx)
+        end
     end
-    -- TODO: If we have the player in list, and filter is false for it, or vice
-    -- versa, add or remove the player, re-sort, and raise a list changed event.
 end
 
 function PlayerListModel:GetItemCount()
@@ -69,6 +144,10 @@ end
 
 function GuildListModel:FilterFunc(player)
     return true
+end
+
+function GuildListModel:SortFunc(p1, p2)
+    return p1:GetName() < p2:GetName()
 end
 
 GuildListModel:lock()
