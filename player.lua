@@ -139,7 +139,7 @@ local function set_role(self, record_name, role)
     -- unknown. If the player role is not recorded yet, just stick
     -- anything we have (including unknown) to it.
     self.record[record_name] = role
-    self.playerdata:OnPlayerChanged(self:GetName())
+    self.playerdata:OnPlayerChanged("Custom", self:GetName())
 end
 
 local function get_role(self, record_name)
@@ -167,7 +167,7 @@ end
 --   2 - offspec
 function Player:SetSelectedRole(selected)
     self.record.selected_role = selected
-    self.playerdata:OnPlayerChanged(self:GetName())
+    self.playerdata:OnPlayerChanged("Custom", self:GetName())
 end
 
 function Player:GetSelectedRole()
@@ -202,21 +202,21 @@ do
     end
 
     local function add_date(player, table_name)
-        local cur_date = uOO:GetClass("Calendar"):GetDateString()
+        local curDate = uOO.Calendar:GetDateString()
         local last_date = get_last_date(player, table_name)
-        if cur_date ~= last_date then
+        if curDate ~= last_date then
             table.insert(get_dates(player, table_name), curDate)
         end
-        self.playerdata:OnPlayerChanged(self:GetName())
+        player.playerData:OnPlayerChanged("Custom", player:GetName())
     end
 
     local function remove_date(player, table_name)
-        local cur_date = uOO:GetClass("Calendar"):GetDateString()
+        local curDate = uOO.Calendar:GetDateString()
         local last_date = get_last_date(player, table_name)
-        if  cur_date == last_date then
+        if  curDate == last_date then
             table.remove(get_dates(player, table_name))
         end
-        self.playerdata:OnPlayerChanged(self:GetName())
+        player.playerData:OnPlayerChanged("Custom", player:GetName())
     end
 
     -- Types of date sets we'll keep
@@ -328,12 +328,12 @@ end
 
 function Player:SetAssignment(assignment)
     self.playerData.state:SetAssignment(self.name, assignment)
-    self.playerdata:OnPlayerChanged(self:GetName())
+    self.playerdata:OnPlayerChanged("Custom", self:GetName())
 end
 
 function Player:RemoveAssignment()
     self.playerData.state:RemoveAssignment(self.name)
-    self.playerdata:OnPlayerChanged(self:GetName())
+    self.playerdata:OnPlayerChanged("Custom", self:GetName())
 end
 
 function Player:GetClassColor()
