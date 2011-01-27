@@ -28,18 +28,19 @@ function DropDown:Initialize(dropdownframe, model)
     self.model = model
     self.dropdown.mediator = self
 
-    self.model:RegisterCallback("ListChanged", self.UpdateList, self)
-    self.model:RegisterCallback("SelectionChanged", self.SetSelected, self)
+    model.RegisterCallback(self, "ListChanged", "OnListUpdated")
+    model.RegisterCallback(self, "SelectionChanged", "OnSelectionChanged")
+
     -- Finally, initialize the list
-    self:UpdateList()
-    self:SetSelected()
+    self:OnListUpdated()
+    self:OnSelectionChanged()
 end
 
-function DropDown:UpdateList()
+function DropDown:OnListUpdated()
     UIDropDownMenu_Initialize(self.dropdown, dropdown_config_items)
 end
 
-function DropDown:SetSelected(event, index)
+function DropDown:OnSelectionChanged(event, index)
     local item = self.model:GetSelectedItem()
     if item then
         UIDropDownMenu_SetSelectedValue(self.dropdown, index)

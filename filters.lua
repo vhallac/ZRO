@@ -78,10 +78,10 @@ function FilterSettingsMediator:Initialize(new_model)
     end
 
     -- And register a listener, so that we can respond to changes
-    model:RegisterCallback("ValueChanged", self.ModelChanged, self)
+    model.RegisterCallback(self, "ValueChanged", "OnModelChanged")
 end
 
-function FilterSettingsMediator:ModelChanged()
+function FilterSettingsMediator:OnModelChanged()
     for _, btn in ipairs(filterButtons) do
         btn:SetChecked(model["Get"..btn.SettingName](model))
     end

@@ -1,5 +1,6 @@
 --[[
-A generic scrollbar controller to do the gruntwork.
+A generic scrollbar mediator to synchronize a list model with a ScrollFrame
+UI element.
 --]]
 
 local L = LibStub("AceLocale-3.0"):GetLocale("ZRO", true)
@@ -8,9 +9,6 @@ local addonName, addonTable = ...
 local uOO = addonTable.uOO
 
 local ScrollFrame = uOO.object:clone()
-
--- local functions (to be defined below)
-local handle_vertical_scroll
 
 --[[
 Parameters:
@@ -35,21 +33,16 @@ function ScrollFrame:Initialize(scrollframe, buttonFactory, model)
     self.btnHeight = button:GetItemHeight()
     scrollframe:SetScript("OnVerticalScroll",
                           function (frame, offset)
-                              FauxScrollFrame_OnVerticalScroll(frame, offset,
-                                                               self.btnHeight,
-                                                               function(frame)
-                                                                   handle_vertical_scroll(self, frame)
-                                                               end)
+                              FauxScrollFrame_OnVerticalScroll(
+                                  frame, offset,
+                                  self.btnHeight,
+                                  function(frame)
+                                      self:HandleVerticalScroll()
+                                  end)
                           end)
     self.model = model
-    model:RegisterCallback("ListChanged",
-                           function(self)
-                               handle_vertical_scroll(self, scrollframe)
-                           end,
-                           self)
-    model:RegisterCallback("ItemChanged",
-                           self.OnItemChanged,
-                           self)
+    model.RegisterCallback(self, "ListChanged", "HandleVerticalScroll")
+    model.RegisterCallback(self, "ItemChanged", "OnItemChanged")
 end
 
 
@@ -72,7 +65,9 @@ function ScrollFrame:OnItemChanged(event, itemIdx)
     end
 end
 
-handle_vertical_scroll = function (self, frame)
+function ScrollFrame:HandleVerticalScroll()
+    local frame = self.scroller
+
     -- Calculate it here to easily allow resizing.
     local buttonCount = self:GetDisplayedItemCount()
 

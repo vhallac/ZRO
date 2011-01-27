@@ -31,12 +31,12 @@ function PlayerData:Initialize()
 
     if not guild then
         guild = uOO.Guild
-        guild:RegisterCallback("JoinedGuild", self.OnGuildChanged, self)
-        guild:RegisterCallback("LeftGuild", self.OnGuildChanged, self)
-        guild:RegisterCallback("MemberConnected", self.OnPlayerChanged, self)
-        guild:RegisterCallback("MemberDisconnected", self.OnPlayerChanged, self)
-        guild:RegisterCallback("MemberRemoved", self.OnGuildChanged, self)
-        guild:RegisterCallback("MemberAdded", self.OnGuildChanged, self)
+        guild.RegisterCallback(self, "JoinedGuild", "OnGuildChanged")
+        guild.RegisterCallback(self, "LeftGuild", "OnGuildChanged")
+        guild.RegisterCallback(self, "MemberConnected", "OnPlayerChanged")
+        guild.RegisterCallback(self, "MemberDisconnected", "OnPlayerChanged")
+        guild.RegisterCallback(self, "MemberRemoved", "OnGuildChanged")
+        guild.RegisterCallback(self, "MemberAdded", "OnGuildChanged")
     end
 end
 
@@ -198,7 +198,7 @@ do
 
     local function get_last_date(player, table_name)
         local dates = get_dates(player, table_name)
-        return dates or "01/01/2010"
+        return dates[#dates] or "01/01/2010"
     end
 
     local function add_date(player, table_name)
@@ -300,6 +300,18 @@ function Player:GetTooltipText()
             "|cff1f1f00" .. v .. "|r\n"
     end
     return text
+end
+
+function Player:AssignToRaid(raidNumber)
+    self.record.raid_number = raidNumber
+end
+
+function Player:RemoveFromRaid()
+    self.record.raid_number = nil
+end
+
+function Player:GetAssignedRaid()
+    return self.record.raid_number
 end
 
 function Player:GetSignupStatus()

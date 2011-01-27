@@ -5,59 +5,138 @@ local uOO = addonTable.uOO
 
 local PlayerListModel = uOO.object:clone()
 
-local players = {}
-local indexMap = {}
-local callbacks = LibStub("CallbackHandler-1.0"):New(PlayerListModel)
-local eventSelector
-playerData = nil
-
 function PlayerListModel:Initialize()
-    if not eventSelector then
-        eventSelector = uOO.EventListModel
+    self.players = {}
+    self.indexMap = {}
+    self.callbacks = LibStub("CallbackHandler-1.0"):New(self)
+
+    uOO.PlayerData.RegisterCallback(self, "ListUpdate", "BuildPlayerList")
+    uOO.PlayerData.RegisterCallback(self, "PlayerDataChanged", "OnPlayerDataChanged")
+
+    -- Inject 'self' to filter function
+    self.filter_func = function(item)
+        return self:FilterFunc(item)
     end
-
-    if not playerData then
-        playerData = uOO.PlayerData
-
-        playerData:RegisterCallback("ListUpdate", self.BuildPlayerList, self)
-        playerData:RegisterCallback("PlayerDataChanged", self.OnPlayerDataChanged, self.class)
-    end
-
     self:BuildPlayerList()
 end
 
 function PlayerListModel:BuildPlayerList()
     -- Clear the player list
-    while #players > 0 do
-        indexMap[players[#players]:GetName()] = nil
-        table.remove(players)
+    while #self.players > 0 do
+        self.indexMap[self.players[#self.players]:GetName()] = nil
+        table.remove(self.players)
     end
 
     -- TODO: Add filter and sort functions
-    for i, player in playerData:GetIterator(nil, nil) do
-        table.insert(players, player)
-        indexMap[player:GetName()] = #players
+    for i, player in uOO.PlayerData:GetIterator(self.filter_func, nil) do
+        table.insert(self.players, player)
+        self.indexMap[player:GetName()] = #self.players
     end
 
-    callbacks:Fire("ListChanged")
+    self.callbacks:Fire("ListChanged")
 end
 
-function PlayerListModel:OnPlayerDataChanged(player)
+function PlayerListModel:OnPlayerDataChanged(event, player)
     -- Re-fire the event with different parameters.
-    local idx = indexMap[player:GetName()]
+    local idx = self.indexMap[player:GetName()]
     if idx then
-        callbacks:Fire("ItemChanged", idx)
+        self.callbacks:Fire("ItemChanged", idx)
     end
+    -- TODO: If we have the player in list, and filter is false for it, or vice
+    -- versa, add or remove the player, re-sort, and raise a list changed event.
 end
 
 function PlayerListModel:GetItemCount()
-    return #players
+    return #self.players
 end
 
 function PlayerListModel:GetItem(itemIdx)
-    return players[itemIdx]
+    return self.players[itemIdx]
 end
 
-PlayerListModel:lock()
+-- Now, we'll have specializations of these player lists. The specializations
+-- will usually only differ by their filter functions.
 
-uOO.PlayerListModel = PlayerListModel
+-- GuildPlayerList: Source for our player pool. People in this list gets
+-- assigned to various lists
+local GuildListModel = PlayerListModel:clone()
+
+function GuildListModel:Initialize()
+    PlayerListModel.Initialize(self)
+    -- The calendar event to source the signup information
+    eventSelector = uOO.EventListModel
+end
+
+function GuildListModel:FilterFunc(player)
+    return true
+end
+
+GuildListModel:lock()
+
+uOO.GuildListModel = GuildListModel
+
+-- SitoutList and PenaltyList: People assigned a sitout or penalty.
+local SitoutListModel = PlayerListModel:clone()
+
+function SitoutListModel:FilterFunc(player)
+    return player:GetLastSitoutDate() == uOO.Calendar:GetDateString()
+end
+
+function SitoutListModel:AddItem(player)
+    player:AddSitout()
+end
+
+function SitoutListModel:RemoveItem(player)
+    player:RemoveSitout()
+end
+
+SitoutListModel:lock()
+uOO.SitoutListModel = SitoutListModel
+
+local PenaltyListModel = PlayerListModel:clone()
+
+function PenaltyListModel:FilterFunc(player)
+    return player:GetLastPenaltyDate() == uOO.Calendar:GetDateString()
+end
+
+function PenaltyListModel:AddItem(player)
+    player:AddPenalty()
+    -- TODO: nail, meet hammer. This is very inefficient for crowded guilds.
+    -- Better to add the guy to my lists, and re-sort. Maybe remove sortfunc
+    -- from playerData and have a Sort() method in base object.
+    self:BuildPlayerList()
+end
+
+function PenaltyListModel:RemoveItem(player)
+    player:RemovePenalty()
+    self:BuildPlayerList()
+end
+
+PenaltyListModel:lock()
+uOO.PenaltyListModel = PenaltyListModel
+
+-- And finally a more generic raid list. We will make clones of these, and pass
+-- in a raid ID at initialization
+
+local RaidListModel = PlayerListModel:clone()
+
+function RaidListModel:Initialize(raidNumber)
+    self.raidNumber = raidNumber
+    PlayerListModel.Initialize(self)
+end
+
+function RaidListModel:FilterFunc(player)
+    return player:GetAssignedRaid() == self.raidNumber
+end
+
+function RaidListModel:AddItem(player)
+    player:AssignToRaid(self.raidNumber)
+    self:BuildPlayerList()
+end
+
+function RaidListModel:RemoveItem(player)
+    player:RemoveFromRaid()
+    self:BuildPlayerList()
+end
+
+uOO.RaidListModel = RaidListModel

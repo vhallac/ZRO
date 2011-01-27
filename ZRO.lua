@@ -42,10 +42,12 @@ function ZRO:OnEnable()
 
     -- Attempt to obtain calendar information
     local calendar = uOO.Calendar
-    calendar:RegisterCallback("CalendarLoaded", self.OnCalendarLoaded, self)
+    calendar.RegisterCallback(self, "CalendarLoaded", "OnCalendarLoaded")
     calendar:LoadEvents()
 
-    uOO.PlayerListModel:Initialize()
+    uOO.GuildListModel:Initialize()
+    uOO.SitoutListModel:Initialize()
+    uOO.PenaltyListModel:Initialize()
     uOO.RaidSetupsModel:Initialize()
 
     uOO.UiSetup:Initialize()
@@ -53,7 +55,7 @@ end
 
 function ZRO:OnDisable()
     local calendar = uOO.Calendar
-    calendar:UnregisterCallback("CalendarLoaded")
+    calendar.UnregisterCallback(self, "CalendarLoaded")
 
     uOO.Guild:Finalize()
 end

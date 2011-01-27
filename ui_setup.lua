@@ -34,11 +34,11 @@ local raidSetupsMediator
 function UiSetup:Initialize()
     if not initialized then
         -- Bind the Player List scroll frame objects together
-        local playerListModel = uOO.PlayerListModel
+        local guildListModel = uOO.GuildListModel
         playerListMediator = uOO.ScrollFrame:clone()
         local buttonFactory = uOO.PlayerButtonFactory:clone()
         local scroller = _G["ZRODialogPlayerListScrollList"]
-        playerListMediator:Initialize(scroller, buttonFactory, playerListModel)
+        playerListMediator:Initialize(scroller, buttonFactory, guildListModel)
 
         -- Bind the Player List Filter Settings objects together
         local filtersModel = uOO.FilterSettingsModel
