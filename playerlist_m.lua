@@ -61,7 +61,9 @@ function PlayerListModel:BuildPlayerList()
     -- reindex
     self:IndexItems()
 
-    self.callbacks:Fire("ListChanged")
+    if modified then
+        self.callbacks:Fire("ListChanged")
+    end
 end
 
 function PlayerListModel:IndexItems(startPos)
