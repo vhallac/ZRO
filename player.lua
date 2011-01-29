@@ -191,7 +191,7 @@ end
 -- date table types.
 do
     local function get_date_count(player, table_name)
-        return #player[table_name]
+        return player[table_name] and #player[table_name] or 0
     end
 
     local function get_dates(player, table_name)
@@ -276,17 +276,17 @@ function Player:GetTooltipText()
 
     if not self:IsOnline() then
         text = text ..
-            "|cffff0000" .. L["PLAYER_OFFLINE"] .. "|r\n\n"
+            "|cffff0000" .. L["Offline"] .. "|r\n\n"
     end
 
     local status = self:GetSignupStatus(self.name)
     if status == const.UNSIGNED then
         text = text ..
-            "|cffff0000" .. L["PLAYER_UNSIGNED"] .. "|r\n\n"
+            "|cffff0000" .. L["Unsigned"] .. "|r\n\n"
     end
 
     text = text ..
-        "|c9f3fff00" .. L["SIGNSTATS"] .. "|r: " ..
+        "|c9f3fff00" .. L["#Signups/Sitouts/Penalties"] .. "|r: " ..
         self:GetSignedCount() .. "/" ..
         self:GetSitoutCount() .. "/" ..
         self:GetPenaltyCount() .. "\n"
@@ -320,25 +320,8 @@ function Player:GetAssignedRaid()
 end
 
 function Player:GetSignupStatus()
-    return self.playerData.state:GetSignupStatus(self.name)
-end
-
-function Player:GetSignupNote()
-    return self.playerData.state:GetSignupNote(self.name)
-end
-
-function Player:GetAssignment()
-    return self.playerData.state:GetAssignment(self.name)
-end
-
-function Player:SetAssignment(assignment)
-    self.playerData.state:SetAssignment(self.name, assignment)
-    self.playerdata:RaisePlayerChanged(self)
-end
-
-function Player:RemoveAssignment()
-    self.playerData.state:RemoveAssignment(self.name)
-    self.playerdata:RaisePlayerChanged(self)
+    -- TODO: Bind to calendar event
+    return const.UNSIGNED
 end
 
 function Player:GetClassColor()

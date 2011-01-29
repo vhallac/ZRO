@@ -35,6 +35,15 @@ function ButtonFactory:Get(index)
         mediator:Initialize(self, button, index)
     end
 
+    button:SetScript("OnEnter",
+                     function()
+                         button.mediator:ShowTooltip()
+                     end)
+    button:SetScript("OnLeave",
+                     function()
+                         button.mediator:HideTooltip()
+                     end)
+
     local inviteBtn = _G[button:GetName().."Invite"]
     inviteBtn:SetScript("OnClick",
                         function()
@@ -50,28 +59,60 @@ function Button:Initialize(factory, uiButton, index)
     self.uiButton = uiButton
     uiButton.mediator = self
 
-
     uiButton:SetNormalTexture("");
     uiButton:SetText("");
     if uiButton.index > 1 then
         local prevButton = factory:Get(uiButton.index-1).uiButton
         uiButton:SetPoint("TOPLEFT", prevButton, "BOTTOMLEFT")
     end
+
+    -- Stop calling this all over the place
+    self.namePrefix = self.uiButton:GetName()
 end
 
 function Button:SetModel(model)
     self.player = model
 end
 
+local function update_label(self)
+    local name = _G[self.namePrefix.."Name"]
+    name:SetText(self.player:GetName())
+    name:SetTextColor(self.player:GetClassColor())
+end
+
 function Button:Update()
     if self.player then
-        local namePrefix = self.uiButton:GetName()
-        local name = _G[namePrefix.."Name"]
-        name:SetText(self.player:GetName())
+        update_label(self)
         self.uiButton:Show()
     else
         self.uiButton:Hide()
     end
+end
+
+setLabel = function (button)
+end
+
+
+function Button:ShowTooltip()
+    if self.player then
+        GameTooltip:SetOwner(self.uiButton, "ANCHOR_RIGHT")
+
+        GameTooltip:AddDoubleLine(self.player:GetName(),
+                                  self.player:GetClass(),
+                                  NORMAL_FONT_COLOR.r,
+                                  NORMAL_FONT_COLOR.g,
+                                  NORMAL_FONT_COLOR.b,
+                                  HIGHLIGHT_FONT_COLOR.r,
+                                  HIGHLIGHT_FONT_COLOR.g,
+                                  HIGHLIGHT_FONT_COLOR.b)
+
+        GameTooltip:AddLine(self.player:GetTooltipText(), 1, 1, 1, 1)
+        GameTooltip:Show()
+    end
+end
+
+function Button:HideTooltip()
+    GameTooltip:Hide()
 end
 
 -- This looks and feels like a kludge, but I couldn't find a good place to
@@ -79,3 +120,4 @@ end
 function Button:GetItemHeight()
     return self.uiButton:GetHeight()
 end
+

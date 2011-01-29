@@ -20,3 +20,6 @@ L["Invite"] = true
 L["Sitouts"] = true
 L["Penalties"] = true
 L["Raid Group: "] = true
+L["Offline"] = true
+L["Unsigned"] = true
+L["#Signups/Sitouts/Penalties"] = true

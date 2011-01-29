@@ -117,14 +117,6 @@
                 </Scripts>
             </Button>
         </Frames>
-        <Scripts>
-            <OnEnter>
-                ZRO:ShowTooltip(self)
-            </OnEnter>
-            <OnLeave>
-                ZRO:HideTooltip(self)
-            </OnLeave>
-        </Scripts>
     </Button>
 
     <!-- The text for the checkbuttons will be filled in from the UI
