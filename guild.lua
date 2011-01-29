@@ -1,3 +1,5 @@
+local L = LibStub("AceLocale-3.0"):GetLocale("ZRO", true)
+
 local addonName, addonTable = ...
 local ZRO = addonTable.ZRO
 local uOO = addonTable.uOO
@@ -8,43 +10,71 @@ local initialized = false
 local memberList = {}
 local callbacks = LibStub("CallbackHandler-1.0"):New(Guild)
 
+-- Local functions (see end of file for definitions)
+local start_periodic_timer
+local stop_periodic_timer
+local speed_up_timer
+local slow_down_timer
+
 function Guild:Initialize()
     if not initialized then
-        ZRO:RegisterEvent("GUILD_ROSTER_UPDATE", self.GuildUpdate, self)
-        ZRO:RegisterEvent("PLAYER_GUILD_UPDATE", self.PlayerUpdate, self)
-
         -- Schedule the first guild roster callback
         GuildRoster()
 
         initialized = true
 
         local playerData = uOO.PlayerData
-        playerData:RegisterPlayerSource("guild",
-                                        function(filterfunc, sortfunc)
-                                            return self:GetIterator(filterfunc, sortfunc)
-                                        end,
-                                        function(iter)
-                                            return self:GetName(iter)
-                                        end)
-        ZRO:RegisterEvent("GUILD_ROSTER_UPDATE", self.GuildUpdate, self)
-        ZRO:RegisterEvent("PLAYER_GUILD_UPDATE", self.PlayerUpdate, self)
+        ZRO.RegisterEvent(self, "GUILD_ROSTER_UPDATE", "GuildUpdate")
+        ZRO.RegisterEvent(self, "PLAYER_GUILD_UPDATE", "PlayerUpdate")
+        ZRO.RegisterEvent(self, "CHAT_MSG_SYSTEM", "OnSystemChatMsg")
 
-        -- Schedule the first guild roster callback
-        GuildRoster()
+        -- Weird events to detect combat, but them's the rules.
+        ZRO.RegisterEvent(self, "PLAYER_REGEN_DISABLED", "OnEnterCombat")
+        ZRO.RegisterEvent(self, "PLAYER_REGEN_ENABLED", "OnLeaveCombat")
+
+        start_periodic_timer(self)
+
+        -- Schedule the first guild roster callback if we are in a guild
+        -- If IsInGuild() returns false, then we'll receiive a
+        -- PLAYER_GUILD_UPDATE event later.
+        if IsInGuild() then
+            GuildRoster()
+        end
     end
 end
+
 
 -- This is a class method
 function Guild:Finalize()
     if initialized then
         initialized = false
-        ZRO:UnregisterEvent("PLAYER_GUILD_UPDATE")
-        ZRO:UnregisterEvent("GUILD_ROSTER_UPDATE")
+        stop_periodic_timer(self)
+        ZRO.UnregisterEvent(self, "PLAYER_REGEN_ENABLED")
+        ZRO.UnregisterEvent(self, "PLAYER_REGEN_DISABLED")
+        ZRO.UnregisterEvent(self, "CHAT_MSG_SYSTEM")
+        ZRO.UnregisterEvent(self, "PLAYER_GUILD_UPDATE")
+        ZRO.UnregisterEvent(self, "GUILD_ROSTER_UPDATE")
         callbacks:UnregisterAllCallbacks()
     end
 end
 
+function Guild:OnEnterCombat()
+    stop_periodic_timer(self)
+end
+
+function Guild:OnLeaveCombat()
+    start_periodic_timer(self)
+end
+
+function Guild:PeriodicTimer()
+    -- Ask the server to update the roster
+    GuildRoster()
+end
+
 function Guild:GuildUpdate(event, arg1)
+    -- Updated already. Slow down the requests
+    slow_down_timer(self)
+
     if not arg1 then
         -- Update for GuildRoster(). Go through local cache, and fix things up.
         self:SyncMembers()
@@ -59,12 +89,23 @@ function Guild:PlayerUpdate(unit)
 
     if IsInGuild() then
         -- Joined a guild. Good for me!
+        speed_up_timer(self)
         GuildRoster()
         callbacks:Fire("JoinedGuild")
     else
         -- Not in guild, clear the member list (except myself)
         self:ClearAll(false)
         callbacks:Fire("LeftGuild")
+    end
+end
+
+function Guild:OnSystemChatMsg(event, msg)
+	if ( string.find(msg, L["has come online"]) or
+         string.find(msg, L["has gone offline"]) or
+         string.find(msg, L["has joined the guild"]) or
+         string.find(msg, L["has left the guild"]) )
+    then
+        speed_up_timer(self)
     end
 end
 
@@ -236,14 +277,29 @@ function Guild:GetClassHexColor(name)
 	return ("%02X%02X%02X"):format(r*255, g*255, b*255)
 end
 
--- TODO: Add monitors for chat message, and keep track of online/offline
--- information that way.
--- TODO2: If it is not accurate enough, do what others did: send a GuildRoster()
--- call every n seconds (15 or 60 are the ones I've seen). Don't forget to
--- disable this when guild page is opened (check if it still causes problems
--- first), or when player enters combat.
-
--- Don't allow cloning this
 Guild:lock()
 
 uOO.Guild = Guild
+
+do
+    local hTimer
+
+    start_periodic_timer = function(self, period)
+        period = period or 15
+        hTimer = ZRO.ScheduleRepeatingTimer(self, "PeriodicTimer", 15)
+    end
+
+    stop_periodic_timer = function(self)
+        ZRO.CancelTimer(self, hTimer)
+    end
+
+    speed_up_timer = function(self)
+        stop_periodic_timer(self)
+        start_periodic_timer(self, 15)
+    end
+
+    slow_down_timer = function(self)
+        stop_periodic_timer(self)
+        start_periodic_timer(self, 60)
+    end
+end

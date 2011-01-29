@@ -23,3 +23,7 @@ L["Raid Group: "] = true
 L["Offline"] = true
 L["Unsigned"] = true
 L["#Signups/Sitouts/Penalties"] = true
+L["has come online"] = true
+L["has gone offline"] = true
+L["has joined the guild"] = true
+L["has left the guild"] = true

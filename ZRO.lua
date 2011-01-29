@@ -28,6 +28,11 @@ local options = {
 }
 
 function ZRO:OnInitialize()
+    local libCfg = LibStub("AceConfig-3.0")
+    if libCfg then
+        libCfg:RegisterOptionsTable("ZRO", options, {"zro"})
+    end
+
     -- Localize the UI
     uOO.UiSetup:LocalizeControls()
 end
@@ -36,6 +41,17 @@ function ZRO:OnEnable()
     -- Set up the data stores of classes that need persistence
     uOO.PlayerData:SetDataStore(ZRO_PlayerData)
     uOO.FilterSettingsModel:SetDataStore(ZRO_Settings.filters)
+
+    -- Add Guild as a player data source
+    uOO.PlayerData:RegisterPlayerSource("guild",
+                                        function(filterfunc)
+                                            return uOO.Guild:GetIterator(filterfunc)
+                                        end,
+                                        function(iter)
+                                            return uOO.Guild:GetName(iter)
+                                        end)
+
+    -- Initialize classes
     uOO.Guild:Initialize()
     uOO.Roster:Initialize()
     uOO.PlayerData:Initialize()
@@ -58,6 +74,11 @@ function ZRO:OnDisable()
     calendar.UnregisterCallback(self, "CalendarLoaded")
 
     uOO.Guild:Finalize()
+end
+
+function ZRO:Start()
+    window = _G["ZRODialog"]
+    window:Show()
 end
 
 --- TEMP
