@@ -147,7 +147,12 @@ function GuildListModel:Initialize()
 end
 
 function GuildListModel:FilterFunc(player)
-    return true
+    local today = uOO.Calendar:GetDateString()
+    local isInSitout = player:GetLastSitoutDate() == today
+    local isInPenalty = player:GetLastPenaltyDate() == today
+    local isAssignedToRaid = player:GetAssignedRaid() and true
+    local includePlayer = not (isInSitout or isInPenalty or isAssignedToRaid)
+    return includePlayer
 end
 
 function GuildListModel:SortFunc(p1, p2)
