@@ -22,7 +22,9 @@ function RaidSetupsModel:Initialize()
     self:AddItem(uOO.SitoutListModel)
     self:AddItem(uOO.PenaltyListModel)
     self:SetSelectedItem(1)
+    self.numRaids = 0
     -- TODO: Go throught the player list and add necessary raid list items
+
     -- TODO2: Have the raids in the main list, and handle sitout and penalty as
     -- special cases. Easier than trying to insert at the right location. For
     -- now, we'll keep those two lists at start.
@@ -46,6 +48,14 @@ end
 
 function RaidSetupsModel:GetItemCount()
     return #lists
+end
+
+function RaidSetupsModel:AddRaidList()
+    local raidIndex = self.numRaids + 1
+    local raidListModel = uOO.RaidListModel:clone()
+    raidListModel:Initialize(raidIndex)
+    self:AddItem(raidListModel)
+    self.numRaids = raidIndex
 end
 
 function RaidSetupsModel:AddItem(item)
