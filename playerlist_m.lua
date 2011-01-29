@@ -95,13 +95,15 @@ function PlayerListModel:OnPlayerUpdate(event, player)
 
     -- Re-fire the event with different parameters.
     local idx = self.indexMap[player:GetName()]
-    if idx and not self:FilterFunc(player) then
+    local filterResult = self:FilterFunc(player)
+    if idx and not filterResult then
         -- We had the player in our list, but the change made it go away.
         -- Delete the entries, and signal a list changed event
         table.remove(self.players, idx)
+        self.indexMap[player:GetName()] = nil
         self:IndexItems(idx)
         self.callbacks:Fire("ListChanged")
-    elseif not idx and self:FilterFunc(player) then
+    elseif filterResult and not idx then
         -- We didn't have the player in list, but the change added it.
         if self.SortFunc then
             idx = bininsert(self.players, player,
