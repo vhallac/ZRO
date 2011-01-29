@@ -13,8 +13,12 @@ function ButtonFactory:Initialize(scrollframe)
     self.templateName = "ZROPlayerTemplate"
 end
 
+function ButtonFactory:SetInviteClickHandler(handler)
+    self.OnInviteClick = handler
+end
+
 function ButtonFactory:Get(index)
-    local button = getglobal(self.namePrefix..index)
+    local button = _G[self.namePrefix..index]
     if not button then
         -- Create a new button. Assume button (i-1) was already created
         button = CreateFrame("Button", self.namePrefix..index, nil, self.templateName)
@@ -31,6 +35,12 @@ function ButtonFactory:Get(index)
         mediator:Initialize(self, button, index)
     end
 
+    local inviteBtn = _G[button:GetName().."Invite"]
+    inviteBtn:SetScript("OnClick",
+                        function()
+                            self.OnInviteClick(button.mediator.player)
+                        end)
+
     return button.mediator
 end
 
@@ -39,6 +49,7 @@ uOO.PlayerButtonFactory = ButtonFactory
 function Button:Initialize(factory, uiButton, index)
     self.uiButton = uiButton
     uiButton.mediator = self
+
 
     uiButton:SetNormalTexture("");
     uiButton:SetText("");

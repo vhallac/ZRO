@@ -129,6 +129,10 @@ function PlayerListModel:GetItem(itemIdx)
     return self.players[itemIdx]
 end
 
+function PlayerListModel:HaveItem(player)
+    return self.indexMap[player:GetName()] and true or false
+end
+
 -- Now, we'll have specializations of these player lists. The specializations
 -- will usually only differ by their filter functions.
 

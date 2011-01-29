@@ -36,9 +36,9 @@ function UiSetup:Initialize()
         -- Bind the Player List scroll frame objects together
         local guildListModel = uOO.GuildListModel
         playerListMediator = uOO.ScrollFrame:clone()
-        local buttonFactory = uOO.PlayerButtonFactory:clone()
+        local buttonFactory1 = uOO.PlayerButtonFactory:clone()
         local scroller = _G["ZRODialogPlayerListScrollList"]
-        playerListMediator:Initialize(scroller, buttonFactory, guildListModel)
+        playerListMediator:Initialize(scroller, buttonFactory1, guildListModel)
 
         -- Bind the Player List Filter Settings objects together
         local filtersModel = uOO.FilterSettingsModel
@@ -61,10 +61,24 @@ function UiSetup:Initialize()
 
         -- Selected group player list
         raidListMediator = uOO.ScrollFrame:clone()
-        local buttonFactory = uOO.PlayerButtonFactory:clone()
+        local buttonFactory2 = uOO.PlayerButtonFactory:clone()
         local scroller = _G["ZRODialogRaidSetupScrollList"]
-        raidListMediator:Initialize(scroller, buttonFactory,
-                                    raidSetupsModel:GetProxyForSelected())
+        local raidSetupsProxyModel = raidSetupsModel:GetProxyForSelected()
+        raidListMediator:Initialize(scroller, buttonFactory2, raidSetupsProxyModel)
+
+        local function OnInviteClick(player)
+            raidSetupsProxyModel:AddOrRemoveItem(player)
+        end
+        buttonFactory1:SetInviteClickHandler(OnInviteClick)
+        buttonFactory2:SetInviteClickHandler(OnInviteClick)
+
+        -- Handler for the NewRaid button.
+        -- No, I will not breat a mediator/model for buttons... yet
+        local newRaidButton = _G["ZRODialogRaidSetupNewRaid"]
+        newRaidButton:SetScript("OnClick",
+                                function()
+                                    raidSetupsModel:AddRaidList()
+                                end)
     end
 end
 

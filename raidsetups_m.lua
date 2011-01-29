@@ -85,6 +85,16 @@ function activeList:GetItem(index)
     return active and active:GetItem(index)
 end
 
+-- This is an interface for PlayerButton functionality
+function activeList:AddOrRemoveItem(item)
+    local active = self.owner:GetSelectedItem()
+    if active:HaveItem(item) then
+        active:RemoveItem(item)
+    else
+        active:AddItem(item)
+    end
+end
+
 function activeList:Fire(event, ...)
     self.callbacks:Fire(event, ...)
 end
