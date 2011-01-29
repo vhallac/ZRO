@@ -19,7 +19,7 @@
         <Color r="1" g="1" b="1" />
     </Font>
     <!-- Simple button that looks like a label -->
-	<Button name="RoleButtonTemplate" virtual="true">
+    <Button name="RoleButtonTemplate" virtual="true">
         <Layers>
             <Layer level="BACKGROUND">
                 <Texture name="$parentColor">
@@ -27,10 +27,10 @@
                 </Texture>
             </Layer>
         </Layers>
-		<ButtonText name="$parentText"/>
-		<NormalFont style="GameFontNormal" />
-		<HighlightFont style="GameFontHighlight"/>
-		<DisabledFont style="GameFontDisable"/>
+        <ButtonText name="$parentText"/>
+        <NormalFont style="GameFontNormal" />
+        <HighlightFont style="GameFontHighlight"/>
+        <DisabledFont style="GameFontDisable"/>
     </Button>
     <Button name="ZROPlayerTemplate" virtual="true" hidden="true" parent="ZebRaidDialogPanel" movable="true">
         <Size x="280" y="17" />
