@@ -43,10 +43,11 @@ function ScrollFrame:Initialize(scrollframe, buttonFactory, model)
     self.model = model
     model.RegisterCallback(self, "ListChanged", "HandleVerticalScroll")
     model.RegisterCallback(self, "ItemChanged", "OnItemChanged")
+
+    self:HandleVerticalScroll()
 end
 
-
-function ScrollFrame:GetFirstItemIndex()
+function ScrollFrame:GetFirstItemOffset()
     return FauxScrollFrame_GetOffset(self.scroller) or 0
 end
 
@@ -55,12 +56,12 @@ function ScrollFrame:GetDisplayedItemCount()
 end
 
 function ScrollFrame:OnItemChanged(event, itemIdx)
-    local firstItem = self:GetFirstItemIndex()
-    if ( itemIdx >= firstItem and
-         itemIdx < self:GetDisplayedItemCount() )
+    local firstItem = self:GetFirstItemOffset()
+    if ( itemIdx > firstItem and
+         itemIdx <= firstItem + self:GetDisplayedItemCount() )
     then
         -- Re-display the item
-        local button = self.buttons:Get(itemIdx - firstItem + 1)
+        local button = self.buttons:Get(itemIdx - firstItem)
         button:Update()
     end
 end
@@ -76,7 +77,7 @@ function ScrollFrame:HandleVerticalScroll()
     local itemCount = self.model:GetItemCount()
     FauxScrollFrame_Update(frame, itemCount, buttonCount, self.btnHeight)
 
-    local topIdx = self:GetFirstItemIndex()
+    local topIdx = self:GetFirstItemOffset()
 
     for i=1, buttonCount do
         local itemIdx = topIdx + i

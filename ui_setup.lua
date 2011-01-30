@@ -66,11 +66,27 @@ function UiSetup:Initialize()
         local raidSetupsProxyModel = raidSetupsModel:GetProxyForSelected()
         raidListMediator:Initialize(scroller, buttonFactory2, raidSetupsProxyModel)
 
-        local function OnInviteClick(player)
-            raidSetupsProxyModel:AddOrRemoveItem(player)
+        local function AddToActive(player)
+            if not raidSetupsProxyModel:HaveItem(player) then
+                -- First, remove player from all possible assignments
+                for i=1,raidSetupsModel:GetItemCount() do
+                    raidSetupsModel:GetItem(i):RemoveItem(player)
+                end
+
+                -- Then add to the active list
+                raidSetupsProxyModel:AddItem(player)
+            end
         end
-        buttonFactory1:SetInviteClickHandler(OnInviteClick)
-        buttonFactory2:SetInviteClickHandler(OnInviteClick)
+        local function RemoveFromActive(player)
+            if raidSetupsProxyModel:HaveItem(player) then
+                raidSetupsProxyModel:RemoveItem(player)
+            end
+        end
+
+        buttonFactory1:SetActionButtonText("->")
+        buttonFactory2:SetActionButtonText("<-")
+        buttonFactory1:SetActionHandler(AddToActive)
+        buttonFactory2:SetActionHandler(RemoveFromActive)
 
         -- Handler for the NewRaid button.
         -- No, I will not breat a mediator/model for buttons... yet

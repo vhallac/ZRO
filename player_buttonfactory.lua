@@ -13,8 +13,22 @@ function ButtonFactory:Initialize(scrollframe)
     self.templateName = "ZROPlayerTemplate"
 end
 
-function ButtonFactory:SetInviteClickHandler(handler)
-    self.OnInviteClick = handler
+function ButtonFactory:SetActionHandler(handler)
+    self.OnActionClick = handler
+end
+
+function ButtonFactory:SetActionButtonText(text)
+    self.ActionButtonText = text
+    -- Now change all the action button labels for existing buttons
+    local index = 1
+    repeat
+        local button = _G[self.namePrefix..index]
+        if button then
+            local actionBtn = _G[button:GetName().."Action"]
+            actionBtn:SetText(self.ActionButtonText)
+        end
+        index = index + 1
+    until not button
 end
 
 function ButtonFactory:Get(index)
@@ -44,10 +58,11 @@ function ButtonFactory:Get(index)
                          button.mediator:HideTooltip()
                      end)
 
-    local inviteBtn = _G[button:GetName().."Invite"]
-    inviteBtn:SetScript("OnClick",
+    local actionBtn = _G[button:GetName().."Action"]
+    actionBtn:SetText(self.ActionButtonText)
+    actionBtn:SetScript("OnClick",
                         function()
-                            self.OnInviteClick(button.mediator.player)
+                            self.OnActionClick(button.mediator.player)
                         end)
 
     return button.mediator
@@ -74,24 +89,50 @@ function Button:SetModel(model)
     self.player = model
 end
 
-local function update_label(self)
+local function update_labels(self)
     local name = _G[self.namePrefix.."Name"]
     name:SetText(self.player:GetName())
     name:SetTextColor(self.player:GetClassColor())
+
+    local raidIdLabel = _G[self.namePrefix.."RaidId"]
+    local raidId = self.player:GetAssignedRaid()
+    raidIdLabel:SetText(raidId and tostring(raidId) or "")
+
+    local roleLabel = _G[self.namePrefix.."Role"]
+    roleLabel:SetText(self.player:GetActiveRole() or "")
+end
+
+local function update_background(self)
+    local bg = _G[self.namePrefix.."Color"]
+    local player = self.player
+    local div
+
+    if self.player:IsOnline() then
+        div = 1
+    else
+        div = 2
+    end
+
+    if player:GetAssignedRaid() then
+        bg:SetTexture(0.1/div, 0.3/div, 0.1/div)
+    elseif player:GetLastSitoutDate() == uOO.Calendar:GetDateString() then
+        bg:SetTexture(0.1/div, 0.3/div, 0.6/div)
+    elseif player:GetLastPenaltyDate() == uOO.Calendar:GetDateString() then
+        bg:SetTexture(0.6/div, 0.1/div, 0.1/div)
+    else
+        bg:SetTexture(0.1/div, 0.1/div, 0.1/div)
+    end
 end
 
 function Button:Update()
     if self.player then
-        update_label(self)
+        update_labels(self)
+        update_background(self)
         self.uiButton:Show()
     else
         self.uiButton:Hide()
     end
 end
-
-setLabel = function (button)
-end
-
 
 function Button:ShowTooltip()
     if self.player then

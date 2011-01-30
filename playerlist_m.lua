@@ -17,6 +17,7 @@ function PlayerListModel:Initialize()
     self.filter_func = function(item)
         return not self.FilterFunc or self:FilterFunc(item)
     end
+
     self:BuildPlayerList()
 end
 
@@ -151,12 +152,7 @@ function GuildListModel:Initialize()
 end
 
 function GuildListModel:FilterFunc(player)
-    local today = uOO.Calendar:GetDateString()
-    local isInSitout = player:GetLastSitoutDate() == today
-    local isInPenalty = player:GetLastPenaltyDate() == today
-    local isAssignedToRaid = player:GetAssignedRaid() and true
-    local includePlayer = not (isInSitout or isInPenalty or isAssignedToRaid)
-    return includePlayer
+    return true
 end
 
 function GuildListModel:SortFunc(p1, p2)

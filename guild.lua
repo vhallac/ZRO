@@ -38,6 +38,9 @@ function Guild:Initialize()
         -- If IsInGuild() returns false, then we'll receiive a
         -- PLAYER_GUILD_UPDATE event later.
         if IsInGuild() then
+            -- Get the list if it is already available
+            self:SyncMembers()
+            -- Schedule an update if it is not
             GuildRoster()
         end
     end

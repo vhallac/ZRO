@@ -85,23 +85,24 @@ local activeList = RaidSetupsModel.active
 activeList.owner = RaidSetupsModel
 activeList.callbacks = LibStub("CallbackHandler-1.0"):New(activeList)
 
-function activeList:GetItemCount()
-    local active = self.owner:GetSelectedItem()
-    return active and active:GetItemCount()
-end
+do
+    local function call_active_list(self, method, ...)
+        local active = self.owner:GetSelectedItem()
+        return active and active[method](active, ...)
+    end
 
-function activeList:GetItem(index)
-    local active = self.owner:GetSelectedItem()
-    return active and active:GetItem(index)
-end
+    local proxyMethods = {
+        "GetItemCount",
+        "GetItem",
+        "HaveItem",
+        "AddItem",
+        "RemoveItem"
+    }
 
--- This is an interface for PlayerButton functionality
-function activeList:AddOrRemoveItem(item)
-    local active = self.owner:GetSelectedItem()
-    if active:HaveItem(item) then
-        active:RemoveItem(item)
-    else
-        active:AddItem(item)
+    for _, method in ipairs(proxyMethods) do
+        activeList[method] = function(self, ...)
+            return call_active_list(activeList, method, ...)
+        end
     end
 end
 
