@@ -15,6 +15,7 @@ locales\locale-enUS.lua
 uOO.lua
 ZRO.lua
 # classes
+duallist.lua
 player.lua
 guild.lua
 roster.lua
