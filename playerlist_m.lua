@@ -2,6 +2,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("ZRO", true)
 
 local addonName, addonTable = ...
 local uOO = addonTable.uOO
+local const = addonTable.const
 
 local PlayerListModel = uOO.object:clone()
 
@@ -113,7 +114,10 @@ function GuildListModel:Initialize()
 end
 
 function GuildListModel:FilterFunc(player)
-    return true
+    local isOnline = player:IsOnline()
+    local status = player:GetSignupStatus()
+    local isSigned = status == const.SIGNED or status == const.UNSURE
+    return isOnline or isSigned
 end
 
 function GuildListModel:SortFunc(p1, p2)
