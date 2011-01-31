@@ -320,8 +320,7 @@ function Player:GetAssignedRaid()
 end
 
 function Player:GetSignupStatus()
-    -- TODO: Bind to calendar event
-    return const.UNSIGNED
+    return uOO.EventListModel:GetSignupStatus(self)
 end
 
 function Player:GetClassColor()
@@ -335,6 +334,12 @@ end
 function Player:IsInRaid()
     -- TODO: Move roster functionality to playerdata
     return self.playerData.roster:IsPlayerInRaid(self.name)
+end
+
+-- This is only required for data providers for the player, such as the calendar
+-- invite
+function Player:DataChanged()
+    self.playerData:RaisePlayerChanged(self)
 end
 
 uOO.PlayerData = PlayerData

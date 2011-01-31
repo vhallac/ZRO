@@ -364,9 +364,24 @@
                         <Offset x="1" y="-1" />
                     </Shadow>
                 </FontString>
+                <FontString name="$parentEventSelectLabel" inherits="TitleFontTplt" text="Calendar Event">
+                    <Anchors>
+                        <Anchor point="TOPLEFT">
+                            <Offset x="20" y="-35" />
+                        </Anchor>
+                    </Anchors>
+                </FontString>
             </Layer>
         </Layers>
         <Frames>
+            <Frame name="$parentEventSelect" inherits="UIDropDownMenuTemplate">
+                <Size x="120" y="20"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="$parentEventSelectLabel" relativePoint="TOPRIGHT">
+                        <Offset x="0" y="5"/>
+                    </Anchor>
+                </Anchors>
+            </Frame>
             <Button name="$parentClose" inherits="UIPanelCloseButton">
                 <Anchors>
                     <Anchor point="TOPRIGHT"/>
@@ -374,8 +389,8 @@
             </Button>
             <Frame name="$parentPlayerList" inherits="ZROPlayerListTemplate">
                 <Anchors>
-                    <Anchor point="TOPLEFT">
-                        <Offset x="20" y="-30"/>
+                    <Anchor point="TOPLEFT" relativeTo="$parentEventSelectLabel" relativePoint="BOTTOMLEFT">
+                        <Offset x="0" y="-10"/>
                     </Anchor>
                     <Anchor point="BOTTOM">
                         <Offset x="20" y="30"/>

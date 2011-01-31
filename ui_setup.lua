@@ -30,6 +30,7 @@ end
 local initialized = false
 local playerListMediator
 local raidSetupsMediator
+local eventSelectorMediator
 
 function UiSetup:Initialize()
     if not initialized then
@@ -47,16 +48,9 @@ function UiSetup:Initialize()
 
         local raidSetupsModel = uOO.RaidSetupsModel
         raidSetupsMediator = uOO.DropDown:clone()
-        -- Fixup some of the DropdownMenu weirdness
-        local raidSetupsFrame = _G["ZRODialogRaidSetupRaidSelect"]
-        UIDropDownMenu_SetWidth(raidSetupsFrame, raidSetupsFrame:GetWidth()-20, 1)
-        UIDropDownMenu_SetButtonWidth(raidSetupsFrame, raidSetupsFrame:GetWidth()-40, 1)
-
         -- Raid selection combo
-        local raidSetupsLabel = _G["ZRODialogRaidSetupRaidSelectText"]
-        raidSetupsLabel:SetJustifyH("LEFT")
-        raidSetupsLabel:SetPoint("LEFT", 30, 2)
-
+        local raidSetupsFrame = _G["ZRODialogRaidSetupRaidSelect"]
+        self.FixupDropdown(raidSetupsFrame)
         raidSetupsMediator:Initialize(raidSetupsFrame, raidSetupsModel)
 
         -- Selected group player list
@@ -95,7 +89,22 @@ function UiSetup:Initialize()
                                 function()
                                     raidSetupsModel:AddRaidList()
                                 end)
+
+        eventSelectorMediator = uOO.DropDown:clone()
+        local eventSelectorFrame = _G["ZRODialogEventSelect"]
+        self.FixupDropdown(eventSelectorFrame)
+
+        eventSelectorMediator:Initialize(eventSelectorFrame, uOO.EventListModel)
     end
+end
+
+-- Fixup some of the DropdownMenu weirdness
+function UiSetup.FixupDropdown(frame)
+    UIDropDownMenu_SetWidth(frame, frame:GetWidth()-20, 1)
+
+    local label = _G[frame:GetName().."Text"]
+    label:SetJustifyH("LEFT")
+    label:SetPoint("LEFT", 30, 2)
 end
 
 UiSetup:lock()

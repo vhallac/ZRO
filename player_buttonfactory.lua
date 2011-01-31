@@ -2,6 +2,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("ZRO", true)
 
 local addonName, addonTable = ...
 local uOO = addonTable.uOO
+local const = addonTable.const
 
 local ButtonFactory = uOO.object:clone()
 local Button = uOO.object:clone()
@@ -89,6 +90,12 @@ function Button:SetModel(model)
     self.player = model
 end
 
+local signupMap = {
+    [const.SIGNED] = "+",
+    [const.UNSIGNED] = "-",
+    [const.UNSURE] = "?"
+}
+
 local function update_labels(self)
     local name = _G[self.namePrefix.."Name"]
     name:SetText(self.player:GetName())
@@ -100,6 +107,9 @@ local function update_labels(self)
 
     local roleLabel = _G[self.namePrefix.."Role"]
     roleLabel:SetText(self.player:GetActiveRole() or "")
+
+    local statusLabel = _G[self.namePrefix.."Status"]
+    statusLabel:SetText(signupMap[self.player:GetSignupStatus()] or "")
 end
 
 local function update_background(self)

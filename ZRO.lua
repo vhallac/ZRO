@@ -54,12 +54,9 @@ function ZRO:OnEnable()
     -- Initialize classes
     uOO.Guild:Initialize()
     uOO.Roster:Initialize()
+    uOO.Calendar:Initialize()
+    uOO.EventListModel:Initialize()
     uOO.PlayerData:Initialize()
-
-    -- Attempt to obtain calendar information
-    local calendar = uOO.Calendar
-    calendar.RegisterCallback(self, "CalendarLoaded", "OnCalendarLoaded")
-    calendar:LoadEvents()
 
     uOO.GuildListModel:Initialize()
     uOO.SitoutListModel:Initialize()
@@ -71,17 +68,12 @@ end
 
 function ZRO:OnDisable()
     local calendar = uOO.Calendar
-    calendar.UnregisterCallback(self, "CalendarLoaded")
 
     uOO.Guild:Finalize()
+    Calendar:Finalize()
 end
 
 function ZRO:Start()
     window = _G["ZRODialog"]
     window:Show()
-end
-
---- TEMP
-function ZRO:OnCalendarLoaded()
-    self:Print("Calendar loaded. No idea how.")
 end

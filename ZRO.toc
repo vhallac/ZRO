@@ -23,6 +23,7 @@ calendar.lua
 filters.lua
 playerlist_m.lua
 raidsetups_m.lua
+eventlist_m.lua
 # UI
 scrollframe.lua
 dropdown.lua
