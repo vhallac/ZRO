@@ -12,4 +12,11 @@ addonTable.const = {
     UNSIGNED = "unsigned",
     UNSURE = "unsure",
     UNKNOWN = "unknown",
+    TANK = "Tank",
+    MELEE = "Melee",
+    HEALER = "Healer",
+    RANGED = "Ranged",
+    PVP = "PvP",
+    PRIMARY = 1,
+    SECONDARY = 2,
 }

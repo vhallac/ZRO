@@ -20,6 +20,7 @@ player.lua
 guild.lua
 roster.lua
 calendar.lua
+classinfo.lua
 filters.lua
 playerlist_m.lua
 raidsetups_m.lua
@@ -29,4 +30,5 @@ scrollframe.lua
 dropdown.lua
 ui_setup.lua
 player_buttonfactory.lua
+player_menu.lua
 frames.xml

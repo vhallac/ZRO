@@ -58,6 +58,17 @@ function ButtonFactory:Get(index)
                      function()
                          button.mediator:HideTooltip()
                      end)
+    button:SetScript("OnClick",
+                     function(_, btn, down)
+                         if btn == "RightButton" then
+                             button.mediator:ShowMenu()
+                         end
+                     end)
+    button:SetScript("OnDoubleClick",
+                     function()
+                         self.OnActionClick(button.mediator.player)
+                     end)
+    button:RegisterForClicks("LeftButtonDown", "LeftButtonUp", "RightButtonDown")
 
     local actionBtn = _G[button:GetName().."Action"]
     actionBtn:SetText(self.ActionButtonText)
@@ -164,6 +175,13 @@ end
 
 function Button:HideTooltip()
     GameTooltip:Hide()
+end
+
+function Button:ShowMenu()
+    if self.player then
+        uOO.PlayerMenu:SetPlayer(self.player)
+        uOO.PlayerMenu:Show()
+    end
 end
 
 -- This looks and feels like a kludge, but I couldn't find a good place to

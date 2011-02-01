@@ -58,6 +58,7 @@ function ZRO:OnEnable()
     uOO.EventListModel:Initialize()
     uOO.PlayerData:Initialize()
 
+    uOO.PlayerMenu:Initialize()
     uOO.GuildListModel:Initialize()
     uOO.SitoutListModel:Initialize()
     uOO.PenaltyListModel:Initialize()

@@ -136,33 +136,40 @@ end
 
 -- These two helper functions make sure changes are replicated for both entries
 
-local function set_role(self, record_name, role)
-    local role = string.lower(role or "unknown")
+local function set_spec(self, record_name, spec)
+    local spec = spec or const.UNKNOWN
     -- Update the player role with the new one unless the role is
     -- unknown. If the player role is not recorded yet, just stick
     -- anything we have (including unknown) to it.
-    self.record[record_name] = role
+    self.record[record_name] = spec
     self.playerData:RaisePlayerChanged(self)
 end
 
+local function get_spec(self, record_name)
+    return self.record[record_name] or const.UNKNOWN
+end
+
 local function get_role(self, record_name)
-    return string.lower(self.record[record_name] or "unknown")
+    return uOO.ClassInfo:GetRoleFromSpec(self:GetClass(),
+                                         get_spec(self, record_name))
 end
 
-function Player:SetPrimaryRole(role)
-    set_role(self, "primary_role", role)
-end
-
-function Player:GetPrimaryRole()
-    return get_role(self, "primary_role")
-end
-
-function Player:SetSecondaryRole(role)
-    set_role(self, "secondary_role", role)
-end
-
-function Player:GetSecondaryRole()
-    return get_role(self, "secondary_role")
+do
+    local specs = {"Primary", "Secondary"}
+    local funcs = {
+        ["Set%sSpec"] = set_spec,
+        ["Get%sSpec"] = get_spec,
+        ["Get%sRole"] = get_role
+    }
+    for i, spec in ipairs(specs) do
+        for func_name, func in pairs(funcs) do
+            local real_name = string.format(func_name, spec)
+            local table_name = string.lower(spec).."Spec"
+            Player[real_name] = function(self, ...)
+                return func(self, table_name, ...)
+            end
+        end
+    end
 end
 
 -- Select the active role:
@@ -174,12 +181,12 @@ function Player:SetSelectedRole(selected)
 end
 
 function Player:GetSelectedRole()
-    return self.record.selected_role or 1
+    return self.record.selected_role or const.PRIMARY
 end
 
 function Player:GetActiveRole()
     local selected = self:GetSelectedRole()
-    if selected == 1 then
+    if selected == const.PRIMARY then
         return self:GetPrimaryRole()
     else
         return self:GetSecondaryRole()
