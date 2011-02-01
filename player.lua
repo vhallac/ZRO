@@ -172,9 +172,7 @@ do
     end
 end
 
--- Select the active role:
---   1 - mainspec
---   2 - offspec
+-- Select the active role. selected is const.PRIMARY or const.SECONDARY
 function Player:SetSelectedRole(selected)
     self.record.selected_role = selected
     self.playerData:RaisePlayerChanged(self)
@@ -182,6 +180,11 @@ end
 
 function Player:GetSelectedRole()
     return self.record.selected_role or const.PRIMARY
+end
+
+function Player:ToggleActiveRole()
+    local role = self:GetSelectedRole()
+    self:SetSelectedRole(role == const.PRIMARY and const.SECONDARY or const.PRIMARY)
 end
 
 function Player:GetActiveRole()

@@ -59,7 +59,7 @@
                     </Anchors>
                 </FontString>
                 <FontString name="$parentName" inherits="PlayerFontTplt" justifyH="LEFT">
-                    <Size x="120" y="17" />
+                    <Size x="100" y="17" />
                     <Anchors>
                         <Anchor point="LEFT" relativeTo="$parentRaidId" relativePoint="RIGHT">
                             <Offset x="0" y="0" />
@@ -92,29 +92,14 @@
                     </OnClick>
                 </Scripts>
             </Button>
-            <Button name="$parentPrimaryRole" inherits="RoleButtonTemplate" text="P">
-                <Size x="20" y="17"/>
+            <Button name="$parentRoleSwitch" inherits="RoleButtonTemplate" text="">
+                <Size x="60" y="17"/>
                 <Anchors>
-                    <Anchor point="RIGHT">
-                        <Offset x="-20" y="0"/>
-                    </Anchor>
+                    <Anchor point="LEFT" relativeTo="$parentRole" relativePoint="RIGHT"/>
                 </Anchors>
                 <Scripts>
                     <OnClick>
                         ZRO:OnPrimaryRoleClick(self)
-                    </OnClick>
-                </Scripts>
-            </Button>
-            <Button name="$parentSecondaryRole" inherits="RoleButtonTemplate" text="S">
-                <Size x="20" y="17"/>
-                <Anchors>
-                    <Anchor point="RIGHT">
-                        <Offset x="0" y="0"/>
-                    </Anchor>
-                </Anchors>
-                <Scripts>
-                    <OnClick>
-                        ZRO:OnSecondryRoleClick(self)
                     </OnClick>
                 </Scripts>
             </Button>

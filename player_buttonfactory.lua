@@ -77,6 +77,17 @@ function ButtonFactory:Get(index)
                             self.OnActionClick(button.mediator.player)
                         end)
 
+    local roleButton = _G[button:GetName().."RoleSwitch"]
+    roleButton:SetScript("OnClick",
+                         function(_, btn)
+                             if btn == "RightButton" then
+                                 button.mediator:ShowMenu()
+                             else
+                                 button.mediator.player:ToggleActiveRole()
+                             end
+                         end)
+    roleButton:RegisterForClicks("LeftButtonDown", "RightButtonDown")
+
     return button.mediator
 end
 
@@ -116,12 +127,20 @@ local function update_labels(self)
     local raidId = self.player:GetAssignedRaid()
     raidIdLabel:SetText(raidId and tostring(raidId) or "")
 
-    local roleLabel = _G[self.namePrefix.."Role"]
-    roleLabel:SetText(self.player:GetActiveRole() or "")
+    local roleButton = _G[self.namePrefix.."RoleSwitch"]
+    roleButton:SetText(self.player:GetActiveRole() or "")
 
     local statusLabel = _G[self.namePrefix.."Status"]
     statusLabel:SetText(signupMap[self.player:GetSignupStatus()] or "")
 end
+
+local roleColors = {
+    [const.TANK]   = {0.4, 0.3, 0.2, 0.5},
+    [const.RANGED] = {0.4, 0,   0.1, 0.5},
+    [const.MELEE]  = {0.4, 0.1, 0,   0.5},
+    [const.HEALER] = {0,   0.4, 0.2, 0.5},
+    [const.PVP]    = {0.1, 0.1, 0.1, 0.5},
+}
 
 local function update_background(self)
     local bg = _G[self.namePrefix.."Color"]
@@ -143,6 +162,11 @@ local function update_background(self)
     else
         bg:SetTexture(0.1/div, 0.1/div, 0.1/div)
     end
+
+    local roleBg = _G[self.namePrefix.."RoleSwitchColor"]
+    local role = self.player:GetActiveRole()
+    local color = roleColors[role] or {0, 0, 0, 0.5}
+    roleBg:SetTexture(unpack(color))
 end
 
 function Button:Update()
